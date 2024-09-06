@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gears - Click n' Clank</title>
+    <link rel="icon" type="image/x-icon" href="./assets/Gear.png" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <section>
+      <div class="main">
+        <div class="left">
+          <p>
+            Gears: <br />
+            <span class="gear-cost yellow-text">0</span>
+          </p>
+          <div class="gear-img-container">
+            <img
+              src="./assets/Gear.png"
+              alt="Gear"
+              srcset=""
+              class="gear-img"
+              onclick="incrementGear(event)"
+              draggable="false"
+            />
+          </div>
+        </div>
+        <div class="right">
+          <!--First Upgrade-->
+          <div class="upgrade" onclick="buyUpgrade('clicker')">
+            <div class="left-section">
+              <img
+                src="./assets/click-icon-black.png"
+                alt=""
+                class="upgrade-img"
+              />
+            </div>
+            <div class="mid-section">
+              <h4>Clicker</h4>
+              <div class="cost-info">
+                <p class="cost-text">
+                  <!--Cost:-->
+                  <span class="clicker-cost">10</span>
+                </p>
+                <img src="./assets/Gear.png" alt="" class="upgrade-gear" />
+              </div>
+            </div>
+            <div class="right-section">
+              Level: <span class="clicker-level">0</span>
+            </div>
+
+            <div class="next-level-info">
+              <p>
+                +<span class="clicker-increase">1</span> gears <br />
+                per click
+              </p>
+            </div>
+          </div>
+          <!--Second Upgrade-->
+          <div class="upgrade" onclick="buyUpgrade('robot_1')">
+            <div class="left-section">
+              <img src="./assets/Robot_1.png" alt="" class="upgrade-img" />
+            </div>
+            <div class="mid-section">
+              <h4>Robot Mk1</h4>
+              <div class="cost-info">
+                <p class="cost-text">
+                  <!--Cost:-->
+                  <span class="robot_1-cost">130</span>
+                </p>
+                <img src="./assets/Gear.png" alt="" class="upgrade-gear" />
+              </div>
+            </div>
+            <div class="right-section">
+              Level: <span class="robot_1-level">0</span>
+            </div>
+
+            <div class="next-level-info">
+              <p>
+                +<span class="robot_1-increase">4</span> gears <br />
+                per second
+              </p>
+            </div>
+          </div>
+          <!--Third Upgrade-->
+          <div class="upgrade" onclick="buyUpgrade('robot_2')">
+            <div class="left-section">
+              <img src="./assets/Robot_2.png" alt="" class="upgrade-img" />
+            </div>
+            <div class="mid-section">
+              <h4>Robot Mk2</h4>
+              <div class="cost-info">
+                <p class="cost-text">
+                  <!--Cost:-->
+                  <span class="robot_2-cost">850</span>
+                </p>
+                <img src="./assets/Gear.png" alt="" class="upgrade-gear" />
+              </div>
+            </div>
+            <div class="right-section">
+              Level: <span class="robot_2-level">0</span>
+            </div>
+
+            <div class="next-level-info">
+              <p>
+                +<span class="robot_2-increase">24</span> gears <br />
+                per second
+              </p>
+            </div>
+          </div>
+          <!--Fourth Upgrade-->
+          <div class="upgrade" onclick="buyUpgrade('robot_3')">
+            <div class="left-section">
+              <img src="./assets/robot_3.png" alt="" class="upgrade-img" />
+            </div>
+            <div class="mid-section">
+              <h4>Robot Mk3</h4>
+              <div class="cost-info">
+                <p class="cost-text">
+                  <!--Cost:-->
+                  <span class="robot_3-cost">4750</span>
+                </p>
+                <img src="./assets/Gear.png" alt="" class="upgrade-gear" />
+              </div>
+            </div>
+            <div class="right-section">
+              Level: <span class="robot_3-level">0</span>
+            </div>
+
+            <div class="next-level-info">
+              <p>
+                +<span class="robot_3-increase">82</span> gears <br />
+                per second
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!--Stats-->
+      <section class="stats">
+        <div class="texts">
+          <p>
+            Gears Per Click:
+            <span id="GearsPerClick-text" class="yellow-text">1</span>
+          </p>
+          <p>
+            Gears Per Second:
+            <span id="GearsPerSecond-text" class="yellow-text">0</span>
+          </p>
+        </div>
+      </section>
+
+      <div class="util-buttons">
+        <button class="util-button" onclick="save()">Save</button>
+        <button class="util-button" onclick="load()">Load</button>
+      </div>
+    </section>
+    <script src="index.js"></script>
+  </body>
+</html>

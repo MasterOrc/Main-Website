@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link
+      rel="icon"
+      type="image/x-icon"
+      href="https://storage.needpix.com/rsynced_images/gradient-826222_1280.jpg"
+    />
+  <title>Content Page</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(72deg,#FD5901,#F78104,#FAAB36,#249EA0,#008083, #005F60);
+      background-size: 400% 400%;
+      animation: gradientBG 20s linear infinite;
+    }
+    @keyframes gradientBG {
+      0% {
+        background-position: 0% 50%;
+      }
+      50% {
+        background-position: 100% 50%;
+      }
+      100% {
+        background-position: 0% 50%;
+      }
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .title {
+      font-size: 3rem;
+      font-weight: bold;
+      color: #fff;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .additional-content {
+      text-align: center;
+      color: #fff;
+    }
+
+    .buttons {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin-top: 40px;
+      text-align: center;
+    }
+
+    .button {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 15px 20px;
+      background-color: transparent; /* Transparent background */
+      color: #fff;
+      text-decoration: none;
+      border-radius: 5px;
+      font-size: 1.2rem;
+      transition: all 0.3s ease;
+      border: 2px solid black; /* Black border */
+    }
+
+    .button:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2);
+      background-color: #000; /* Black background on hover */
+      border-color: #000; /* Black border on hover */
+    }
+
+    /* Media Query for Mobile Devices */
+    @media screen and (max-width: 600px) {
+      .title {
+        font-size: 2rem;
+        
+      }
+      .button {
+        padding: 12px 16px;
+        font-size: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="title">Welcome to my Content Page!</div>
+    <div class="additional-content">
+      <p>Here, you can find a variety of interesting content, resources, and more.</p>
+      <p>Explore the buttons below to discover what we have to offer.</p>
+    </div>
+    <div class="buttons">
+      <a class="button button1" href="/Clink n' Clank/index.html">Clink n' Clank</a>
+      <a class="button button2" href="ComingSoon.html">Button 2</a>
+      <a class="button button3" href="ComingSoon.html">Button 3</a>
+      <a class="button button4" href="ComingSoon.html">Button 4</a>
+      <a class="button button5" href="https://tntbasketball.netlify.app/">Button 5</a>
+      <!-- Add more buttons as needed -->
+    </div>
+  </div>
+</body>
+</html>
