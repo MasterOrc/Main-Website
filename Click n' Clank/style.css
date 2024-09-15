@@ -1,0 +1,238 @@
+/* Fonts */
+/* Roboto Mono */
+@import url("https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,100..700;1,100..700&display=swap");
+/* Rubik Mono One */
+@import url("https://fonts.googleapis.com/css2?family=Rubik+Mono+One&display=swap");
+/* Orbitron*/
+@import url("https://fonts.googleapis.com/css2?family=Orbitron:wght@400..900&display=swap");
+
+body {
+  display: grid;
+  place-items: center;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+  background-image: url(assets/Background_1.jpg);
+  background-repeat: no-repeat;
+  background-size: cover;
+  color: #ffffff;
+  user-select: none;
+  position: relative;
+  font-family: "Orbitron", sans-serif;
+}
+
+.main {
+  display: flex;
+  gap: 200px;
+}
+
+.left {
+  text-align: center;
+  font-size: 30px;
+  margin-bottom: 30px;
+  font-family: "Orbitron", sans-serif;
+}
+
+.yellow-text {
+  font-size: 32px;
+  color: #ffff00;
+  font-weight: 600;
+  text-shadow: 2px 2px 3px black;
+}
+
+.cost-text {
+  font-size: 18px;
+}
+
+.gear-img {
+  width: 200px;
+  filter: brightness(80%);
+}
+
+.gear-img:hover {
+  cursor: pointer;
+  transform: scale(1.03);
+  filter: brightness(100%);
+}
+
+.gear-img:active {
+  opacity: 0.8;
+  transform: scale(1.06);
+}
+
+.upgrade-img {
+  width: 45px;
+}
+
+.gear-img-container {
+  position: relative;
+}
+
+.upgrade-gear {
+  width: 25px;
+  height: 25px;
+}
+
+#upgrades-container {
+  max-height: 400px;
+  width: 500px;
+  padding: 20px;
+  overflow-y: scroll;
+  border: 2px rgb(150, 150, 150) solid;
+  border-radius: 4px;
+  box-shadow: 2px 2px 4px rgb(140, 140, 140);
+  position: relative;
+}
+
+.upgrade {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 330px;
+  height: 60px;
+  border: 3px solid rgb(105, 105, 105);
+  padding: 13px 20px;
+  border-radius: 3px;
+  position: relative;
+  background-color: #b87333;
+  margin-bottom: 20px;
+  font-family: "Orbitron", sans-serif;
+  filter: brightness(90%);
+}
+
+.upgrade:hover {
+  filter: brightness(100%);
+}
+.upgrade:active {
+  transform: scale(1.01);
+}
+
+.mid-section h4 {
+  margin: 0;
+  margin-bottom: 20px;
+  font-size: 20px;
+}
+
+.mid-section p {
+  margin: 0;
+}
+
+.cost-info {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+}
+
+.next-level-info {
+  position: absolute;
+  right: -105px;
+  background-color: #696969;
+  height: 87px;
+  width: 100px;
+  text-align: center;
+  display: none;
+  font-size: 15px;
+  border-radius: 2px;
+}
+
+.upgrade:hover .next-level-info {
+  display: block;
+}
+
+.stats {
+  position: absolute;
+  bottom: 0;
+  left: 15%;
+  padding: 15px;
+  border: 2px solid white;
+  border-radius: 10px;
+  box-sizing: border-box; /* Include padding and border in element's width and height */
+  font-family: "Orbitron", sans-serif;
+  display: inline-block; /* Adjust width based on content */
+  background-color: rgba(
+    0,
+    0,
+    0,
+    0.5
+  ); /* Optional: Add background for better visibility */
+}
+
+.texts {
+  display: flex;
+  gap: 100px;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 22px;
+}
+
+.texts p {
+  margin: 0;
+}
+
+.util-buttons{
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  display: flex;
+  gap: 10px;
+}
+
+.util-button  {
+  padding: 8px 15px;
+  font-size: 16px;
+  font-weight: 600;
+  font-family: inherit;
+  border-radius: 6px;
+}
+
+.util-button:hover {
+  opacity: 0.7;
+  cursor: pointer;
+}
+
+.fade-up {
+  animation: fade-up 1s;
+}
+
+@keyframes fade-up {
+  0% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  20% {
+    transform: translateY(-5px);
+    opacity: 0.9;
+  }
+  40% {
+    transform: translateY(-13px);
+    opacity: 0.75;
+  }
+  60% {
+    transform: translateY(-25px);
+    opacity: 0.55;
+  }
+  80% {
+    transform: translateY(-42px);
+    opacity: 0.3;
+  }
+  100% {
+    transform: translateY(-65px);
+    opacity: 0;
+  }
+}
+
+.notification {
+  position: fixed;
+  top: 60px;
+  right: 100px;
+  background-color: rgba(0, 0, 0, 0.7);
+  color: #ffffff;
+  padding: 10px 20px;
+  border-radius: 5px;
+  display: none; /* Hide by default */
+  z-index: 1000;
+}
+
+.home-button{
+  text-decoration: none;
+}
