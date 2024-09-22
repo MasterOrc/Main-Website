@@ -14,19 +14,19 @@ export const defaultValues = [
   {
     name: "Robot_MK2",
     image: "./assets/Robot_2.png",
-    cost: 380,
-    increase: 16,
+    cost: 480,
+    increase: 32,
   },
   {
     name: "Robot_MK3",
     image: "./assets/Robot_3.png",
-    cost: 3105,
-    increase: 82,
+    cost: 4240,
+    increase: 410,
   },
   {
     name: "Robot_MK4",
     image: "./assets/Robot_5.png",
-    cost: 23105,
-    increase: 482,
+    cost: 52800,
+    increase: 5500,
   },
 ];

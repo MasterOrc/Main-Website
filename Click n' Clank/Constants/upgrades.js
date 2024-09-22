@@ -24,10 +24,25 @@ export const upgrades = [
     cost: document.querySelector(".Clicker-cost"),
     parsedCost: parseFloat(document.querySelector(".Clicker-cost").innerHTML),
     increase: document.querySelector(".Clicker-increase"),
-    parsedIncrease: parseFloat(
-      document.querySelector(".Clicker-increase").innerHTML
-    ),
+    parsedIncrease: parseFloat(document.querySelector(".Clicker-increase").innerHTML),
     level: document.querySelector(".Clicker-level"),
+    powerUps: [
+      {
+        name: "2x Clicker",
+        description: "Double clicking power",
+        multiplier: 2,
+      },
+      {
+        name: "3x Clicker",
+        description: "Triple clicking power",
+        multiplier: 3,
+      },
+      {
+        name: "2x Clicker",
+        description: "Double clicking power",
+        multiplier: 2,
+      },
+    ],
     gearMultiplier: 1.025,
     costMultiplier: 1.12,
   },
@@ -36,10 +51,27 @@ export const upgrades = [
     cost: document.querySelector(".Robot_MK1-cost"),
     parsedCost: parseFloat(document.querySelector(".Robot_MK1-cost").innerHTML),
     increase: document.querySelector(".Robot_MK1-increase"),
-    parsedIncrease: parseFloat(
-      document.querySelector(".Robot_MK1-increase").innerHTML
-    ),
+    parsedIncrease: parseFloat(document.querySelector(".Robot_MK1-increase").innerHTML),
+    powerUps: [
+      {
+        name: "2x Robot_MK1",
+        description: "Double Robot_MK1 efficiency",
+        multiplier: 2,
+      },
+      {
+        name: "3x Robot_MK1",
+        description: "Triple Robot_MK1 efficiency",
+        multiplier: 3,
+      },
+      {
+        name: "2x Robot_MK1",
+        description: "Double Robot_MK1 efficiency",
+        multiplier: 2,
+      },
+    ],
+
     level: document.querySelector(".Robot_MK1-level"),
+    power: 0,
     gearMultiplier: 1.03,
     costMultiplier: 1.15,
   },
@@ -51,7 +83,25 @@ export const upgrades = [
     parsedIncrease: parseFloat(
       document.querySelector(".Robot_MK2-increase").innerHTML
     ),
+    powerUps: [
+      {
+        name: "2x Robot_MK2",
+        description: "Double Robot_MK2 efficiency",
+        multiplier: 2,
+      },
+      {
+        name: "3x Robot_MK2",
+        description: "Triple Robot_MK2 efficiency",
+        multiplier: 3,
+      },
+      {
+        name: "2x Robot_MK2",
+        description: "Double Robot_MK2 efficiency",
+        multiplier: 2,
+      },
+    ],
     level: document.querySelector(".Robot_MK2-level"),
+    power: 0,
     gearMultiplier: 1.035,
     costMultiplier: 1.11,
   },
@@ -63,7 +113,25 @@ export const upgrades = [
     parsedIncrease: parseFloat(
       document.querySelector(".Robot_MK3-increase").innerHTML
     ),
+    powerUps: [
+      {
+        name: "2x Robot_MK3",
+        description: "Double Robot_MK3 efficiency",
+        multiplier: 2,
+      },
+      {
+        name: "3x Robot_MK3",
+        description: "Triple Robot_MK3 efficiency",
+        multiplier: 3,
+      },
+      {
+        name: "2x Robot_MK3",
+        description: "Double Robot_MK3 efficiency",
+        multiplier: 2,
+      },
+    ],
     level: document.querySelector(".Robot_MK3-level"),
+    power: 0,
     gearMultiplier: 1.04,
     costMultiplier: 1.1,
   },
@@ -75,8 +143,29 @@ export const upgrades = [
     parsedIncrease: parseFloat(
       document.querySelector(".Robot_MK4-increase").innerHTML
     ),
+    powerUps: [
+      {
+        name: "2x Robot_MK4",
+        description: "Double Robot_MK4 efficiency",
+        multiplier: 2,
+      },
+      {
+        name: "3x Robot_MK4",
+        description: "Triple Robot_MK4 efficiency",
+        multiplier: 3,
+      },
+      {
+        name: "2x Robot_MK4",
+        description: "Double Robot_MK4 efficiency",
+        multiplier: 2,
+      },
+    ],
     level: document.querySelector(".Robot_MK4-level"),
-    gearMultiplier: 1.04,
-    costMultiplier: 1.1,
+    power: 0,
+    gearMultiplier: 1.045,
+    costMultiplier: 1.098,
   },
 ];
+
+export const powerUpIntervals = [10, 20, 30, //50, 70, 100, 150, 200, 250, 300
+  ];

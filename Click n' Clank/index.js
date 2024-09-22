@@ -1,4 +1,4 @@
-import { upgrades } from "./Constants/upgrades.js";
+import { powerUpIntervals, upgrades } from "./Constants/upgrades.js";
 
 let gear = document.querySelector(".gear-cost");
 let parsedGear = parseFloat(gear.innerHTML);
@@ -45,6 +45,10 @@ function buyUpgrade(upgrade) {
     if (u.name === upgrade) return u;
   });
 
+  const upgradeDiv = document.getElementById(`${mu.name}-upgrade`)
+  const nextLevelDiv = document.getElementById(`${mu.name}-next-level`)
+  const nextLevelP = document.getElementById(`${mu.name}-next-p`)
+
   if (parsedGear >= mu.parsedCost) {
     const upgradeSound = new Audio("./assets/Audio/upgrade.mp3");
     upgradeSound.volume = 0.1;
@@ -52,22 +56,52 @@ function buyUpgrade(upgrade) {
 
     gear.innerHTML = Math.round((parsedGear -= mu.parsedCost));
 
+    let index = powerUpIntervals.indexOf(parseFloat(mu.level.innerHTML))
+    
+    if  (index !== -1) {
+      upgradeDiv.style.cssText = `border-color: rgb(105, 105, 105)`;
+      nextLevelDiv.style.cssText = `background-color: rgb(105, 105, 105); font-weight: normal`;
+      mu.cost.innerHTML = Math.round(mu.parsedCost *= mu.costMultiplier)
+
+      if (mu.name === 'Clicker') {
+        gears_per_click *= mu.powerUps[index].multiplier
+        nextLevelP.innerHTML = `+${mu.parsedIncrease} gears per click`
+      } else {
+        gears_per_second -= mu.power
+        mu.power *= mu.powerUps[index].multiplier
+        gears_per_second += mu.power
+        nextLevelP.innerHTML = `+${mu.parsedIncrease} gears per second`
+      }
+    }
+
     mu.level.innerHTML++;
 
-    mu.parsedIncrease = parseFloat(
-      (mu.parsedIncrease * mu.gearMultiplier).toFixed(2)
-    );
-    mu.increase.innerHTML = mu.parsedIncrease;
+    index = powerUpIntervals.indexOf(parseFloat(mu.level.innerHTML))
 
-    mu.parsedCost *= mu.costMultiplier;
-    mu.cost.innerHTML = Math.round(mu.parsedCost);
+    if ( index !== -1) {
+      upgradeDiv.style.cssText = `border-color: #02E218`;
+      nextLevelDiv.style.cssText = `background-color: #DD571C; font-weight: bold`;
+      nextLevelP.innerText = mu.powerUps[index].description;
 
-    if (mu.name === "clicker") {
-      gears_per_click += mu.parsedIncrease;
+      mu.cost.innerHTML = Math.round(mu.parsedCost * 2.5 * 1.004 ** parseFloat(mu.level.innerHTML))
     } else {
-      gears_per_second += mu.parsedIncrease;
+      mu.cost.innerHTML = Math.round(mu.parsedCost *= mu.costMultiplier);
+      mu.parsedIncrease = parseFloat((mu.parsedIncrease * mu.gearMultiplier).toFixed(2));
+
+      if (mu.name === 'Clicker') nextLevelP.innerHTML = `+${mu.parsedIncrease} gears per click`
+      else nextLevelP.innerHTML = `+${mu.parsedIncrease} gears per second`
     }
+
+    if (mu.name === 'Clicker') gears_per_click += mu.parsedIncrease
+    else{
+      gears_per_second -= mu.power
+      mu.power += mu.parsedIncrease
+      gears_per_second += mu.power
+    }
+
   }
+  //console.log(gears_per_click)
+  //console.log(gears_per_second)
 }
 
 function updateTitle() {
@@ -94,11 +128,11 @@ function showNotification(message) {
   }, 2000); // Hide notification after 2 seconds
 }
 
-// Auto-save interval set to 5 minutes (300000 milliseconds)
+// Auto-save interval set to 3 minutes (180000 milliseconds)
 setInterval(() => {
   save();
   showNotification("Game auto-saved");
-}, 300000); // 5 minutes in milliseconds
+}, 180000); // 3 minutes in milliseconds
 
 // Game Saving Logic
 function save() {
