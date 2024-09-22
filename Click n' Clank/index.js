@@ -1,3 +1,5 @@
+import { upgrades } from "./Constants/upgrades.js";
+
 let gear = document.querySelector(".gear-cost");
 let parsedGear = parseFloat(gear.innerHTML);
 
@@ -10,68 +12,12 @@ let gears_per_click = 1;
 
 let gears_per_second = 0;
 
-const upgrades = [
-  {
-    name: "clicker",
-    cost: document.querySelector(".clicker-cost"),
-    parsedCost: parseFloat(document.querySelector(".clicker-cost").innerHTML),
-    increase: document.querySelector(".clicker-increase"),
-    parsedIncrease: parseFloat(
-      document.querySelector(".clicker-increase").innerHTML
-    ),
-    level: document.querySelector(".clicker-level"),
-    gearMultiplier: 1.025,
-    costMultiplier: 1.12,
-  },
-  {
-    name: "robot_1",
-    cost: document.querySelector(".robot_1-cost"),
-    parsedCost: parseFloat(document.querySelector(".robot_1-cost").innerHTML),
-    increase: document.querySelector(".robot_1-increase"),
-    parsedIncrease: parseFloat(
-      document.querySelector(".robot_1-increase").innerHTML
-    ),
-    level: document.querySelector(".robot_1-level"),
-    gearMultiplier: 1.03,
-    costMultiplier: 1.115,
-  },
-  {
-    name: "robot_2",
-    cost: document.querySelector(".robot_2-cost"),
-    parsedCost: parseFloat(document.querySelector(".robot_2-cost").innerHTML),
-    increase: document.querySelector(".robot_2-increase"),
-    parsedIncrease: parseFloat(
-      document.querySelector(".robot_2-increase").innerHTML
-    ),
-    level: document.querySelector(".robot_2-level"),
-    gearMultiplier: 1.035,
-    costMultiplier: 1.11,
-  },
-  {
-    name: "robot_3",
-    cost: document.querySelector(".robot_3-cost"),
-    parsedCost: parseFloat(document.querySelector(".robot_3-cost").innerHTML),
-    increase: document.querySelector(".robot_3-increase"),
-    parsedIncrease: parseFloat(
-      document.querySelector(".robot_3-increase").innerHTML
-    ),
-    level: document.querySelector(".robot_3-level"),
-    gearMultiplier: 1.04,
-    costMultiplier: 1.1,
-  },
-];
+const bgm = new Audio("./assets/Audio/bgm.mp3");
+bgm.volume = 0.05;
 
-/**
- * Function to update the title with the current gear count.
- */
-function updateTitle() {
-  document.title = `${Math.round(parsedGear)} Gears - Click n' Clank`;
-}
-
-/**
- * Function to increment the gear value by 1 and update the gear display on the UI.
- */
 function incrementGear(event) {
+  const clickingSound = new Audio("./assets/Audio/click.wav");
+  clickingSound.play();
   gear.innerHTML = Math.round((parsedGear += gears_per_click));
   updateTitle(); // Update the title after incrementing the gears
 
@@ -100,6 +46,10 @@ function buyUpgrade(upgrade) {
   });
 
   if (parsedGear >= mu.parsedCost) {
+    const upgradeSound = new Audio("./assets/Audio/upgrade.mp3");
+    upgradeSound.volume = 0.1;
+    upgradeSound.play();
+
     gear.innerHTML = Math.round((parsedGear -= mu.parsedCost));
 
     mu.level.innerHTML++;
@@ -120,41 +70,8 @@ function buyUpgrade(upgrade) {
   }
 }
 
-function save() {
-  localStorage.clear();
-
-  upgrades.map((upgrade) => {
-    const obj = JSON.stringify({
-      parsedLevel: parseFloat(upgrade.level.innerHTML),
-      parsedCost: upgrade.parsedCost,
-      parsedIncrease: upgrade.parsedIncrease,
-    });
-
-    localStorage.setItem(upgrade.name, obj);
-  });
-
-  localStorage.setItem("gears_per_click", JSON.stringify(gears_per_click));
-  localStorage.setItem("gears_per_second", JSON.stringify(gears_per_second));
-  localStorage.setItem("gear", JSON.stringify(parsedGear));
-}
-
-function load() {
-  upgrades.map((upgrade) => {
-    const savedValues = JSON.parse(localStorage.getItem(upgrade.name));
-
-    upgrade.parsedCost = savedValues.parsedCost;
-    upgrade.parsedIncrease = savedValues.parsedIncrease;
-
-    upgrade.level.innerHTML = savedValues.parsedLevel;
-    upgrade.cost.innerHTML = Math.round(upgrade.parsedCost);
-    upgrade.increase.innerHTML = upgrade.parsedIncrease;
-  });
-
-  gears_per_click = JSON.parse(localStorage.getItem("gears_per_click"));
-  gears_per_second = JSON.parse(localStorage.getItem("gears_per_second"));
-  parsedGear = JSON.parse(localStorage.getItem("gear"));
-
-  gear.innerHTML = Math.round(parsedGear);
+function updateTitle() {
+  document.title = `Gears - ${Math.round(parsedGear)} | Click n' Clank`;
 }
 
 setInterval(() => {
@@ -162,6 +79,7 @@ setInterval(() => {
   gear.innerHTML = Math.round(parsedGear);
   gears_per_clickText.innerHTML = Math.round(gears_per_click);
   gears_per_secondText.innerHTML = Math.round(gears_per_second);
+  bgm.play();
 
   updateTitle(); // Update the title regularly
 }, 100);
@@ -176,47 +94,51 @@ function showNotification(message) {
   }, 2000); // Hide notification after 2 seconds
 }
 
+// Auto-save interval set to 5 minutes (300000 milliseconds)
+setInterval(() => {
+  save();
+  showNotification("Game auto-saved");
+}, 300000); // 5 minutes in milliseconds
+
+// Game Saving Logic
 function save() {
   localStorage.clear();
-
-  upgrades.forEach((upgrade) => {
+  upgrades.map((upgrade) => {
     const obj = JSON.stringify({
       parsedLevel: parseFloat(upgrade.level.innerHTML),
       parsedCost: upgrade.parsedCost,
       parsedIncrease: upgrade.parsedIncrease,
     });
-
     localStorage.setItem(upgrade.name, obj);
   });
-
   localStorage.setItem("gears_per_click", JSON.stringify(gears_per_click));
   localStorage.setItem("gears_per_second", JSON.stringify(gears_per_second));
   localStorage.setItem("gear", JSON.stringify(parsedGear));
 
-  showNotification("Game saved!");
+  // Show notification when game is manually saved
+  showNotification("Game saved successfully");
 }
 
+// Game Loading Logic
 function load() {
-  upgrades.forEach((upgrade) => {
+  upgrades.map((upgrade) => {
     const savedValues = JSON.parse(localStorage.getItem(upgrade.name));
-
-    if (savedValues) {
-      upgrade.parsedCost = savedValues.parsedCost;
-      upgrade.parsedIncrease = savedValues.parsedIncrease;
-
-      upgrade.level.innerHTML = savedValues.parsedLevel;
-      upgrade.cost.innerHTML = Math.round(upgrade.parsedCost);
-      upgrade.increase.innerHTML = upgrade.parsedIncrease;
-    }
+    upgrade.parsedCost = savedValues.parsedCost;
+    upgrade.parsedIncrease = savedValues.parsedIncrease;
+    upgrade.level.innerHTML = savedValues.parsedLevel;
+    upgrade.cost.innerHTML = Math.round(upgrade.parsedCost);
+    upgrade.increase.innerHTML = upgrade.parsedIncrease;
   });
-
-  gears_per_click =
-    JSON.parse(localStorage.getItem("gears_per_click")) || gears_per_click;
-  gears_per_second =
-    JSON.parse(localStorage.getItem("gears_per_second")) || gears_per_second;
-  parsedGear = JSON.parse(localStorage.getItem("gear")) || parsedGear;
-
+  gears_per_click = JSON.parse(localStorage.getItem("gears_per_click"));
+  gears_per_second = JSON.parse(localStorage.getItem("gears_per_second"));
+  parsedGear = JSON.parse(localStorage.getItem("gear"));
   gear.innerHTML = Math.round(parsedGear);
 
-  showNotification("Game loaded!");
+  // Show notification when game is successfully loaded
+  showNotification("Game loaded successfully");
 }
+
+window.incrementGear = incrementGear;
+window.buyUpgrade = buyUpgrade;
+window.save = save;
+window.load = load;
