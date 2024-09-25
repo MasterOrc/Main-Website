@@ -162,7 +162,7 @@ export const upgrades = [
     ],
     level: document.querySelector(".Robot_MK4-level"),
     power: 0,
-    gearMultiplier: 100.045,
+    gearMultiplier: 1.045,
     costMultiplier: 1.098,
   },
 ];
