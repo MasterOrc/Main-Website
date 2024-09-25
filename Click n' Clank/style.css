@@ -59,6 +59,7 @@ body {
 .gear-img {
   width: 200px;
   filter: brightness(80%);
+  padding-top: 20px;
 }
 
 .gear-img:hover {
