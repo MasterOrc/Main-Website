@@ -47,6 +47,11 @@ body {
   text-shadow: 2px 2px 3px black;
 }
 
+.gear-cost {
+  position: absolute;
+  display: block;
+}
+
 .cost-text {
   font-size: 18px;
 }
