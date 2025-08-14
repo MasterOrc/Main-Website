@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gears - Click n' Clank v2</title>
+    <link rel="icon" type="image/x-icon" href="./assets/Gear.png" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <section>
+      <!-- Main Game Interface -->
+      <div class="main">
+        <!-- Left Section: Clickable Gear -->
+        <div class="left">
+          <p>
+            Gears: <br />
+            <span class="gear-cost yellow-text">0</span>
+          </p>
+          <div class="gear-img-container">
+            <img
+              src="./assets/Gear.png"
+              alt="Gear"
+              class="gear-img"
+              onclick="incrementGear(event)"
+              draggable="false"
+            />
+            <!-- Click multiplier display -->
+            <div class="click-multiplier-display" id="click-multiplier">
+              x<span id="click-multiplier-value">1</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Upgrade Section -->
+        <div class="right" id="upgrades-container"></div>
+      </div>
+
+      <!-- Stats Section -->
+      <section class="stats">
+        <div class="texts">
+          <p>
+            Gears Per Click:
+            <span id="GearsPerClick-text" class="yellow-text">1</span>
+          </p>
+          <p>
+            Gears Per Second:
+            <span id="GearsPerSecond-text" class="yellow-text">0</span>
+          </p>
+          <p>
+            Total Clicks:
+            <span id="TotalClicks-text" class="yellow-text">0</span>
+          </p>
+        </div>
+      </section>
+
+      <!-- Utility Buttons -->
+      <div class="util-buttons">
+        <button class="util-button" onclick="save()">Save</button>
+        <button class="util-button" onclick="load()">Load</button>
+        <button class="util-button" onclick="toggleAchievements()">Achievements</button>
+        <button class="util-button" onclick="resetGame()">Reset</button>
+      </div>
+
+      <!-- Achievements Panel -->
+      <div id="achievements-panel" class="achievements-panel">
+        <div class="achievements-header">
+          <h2>Achievements</h2>
+          <button class="close-achievements" onclick="toggleAchievements()">×</button>
+        </div>
+        <div class="achievements-progress">
+          <p>Progress: <span id="achievements-completed">0</span>/<span id="achievements-total">0</span></p>
+          <div class="achievement-progress-bar">
+            <div class="achievement-progress-fill" id="achievement-progress-fill"></div>
+          </div>
+        </div>
+        <div class="achievements-list" id="achievements-list"></div>
+      </div>
+
+      <!-- Enhanced Notification System -->
+      <div id="notification-container" class="notification-container"></div>
+
+      <!-- Loading Screen -->
+      <div id="loading-screen" class="loading-screen">
+        <div class="loading-content">
+          <img src="./assets/Gear.png" alt="Loading" class="loading-gear" />
+          <h2>Click n' Clank v2</h2>
+          <p>Loading enhanced experience...</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Templates -->
+    <script id="upgrade-template" type="text/template">
+      <div class="upgrade" onclick="buyUpgrade('{{name}}')" id="{{name}}-upgrade">
+        <div class="left-section">
+          <img src="{{image}}" alt="{{name}}" class="upgrade-img" />
+        </div>
+        <div class="mid-section">
+          <h4>{{name}}</h4>
+          <div class="cost-info">
+            <p class="cost-text">
+              <span class="{{name}}-cost">{{cost}}</span>
+            </p>
+            <img src="./assets/Gear.png" alt="" class="upgrade-gear" />
+          </div>
+        </div>
+        <div class="right-section">
+          Level: <span class="{{name}}-level">0</span>
+        </div>
+        <div class="next-level-info" id="{{name}}-next-level">
+          <p id="{{name}}-next-p">+<span class="{{name}}-increase">{{increase}}</span> gears per {{type}}</p>
+        </div>
+        <div class="upgrade-progress" id="{{name}}-progress">
+          <div class="upgrade-progress-bar">
+            <div class="upgrade-progress-fill" id="{{name}}-progress-fill"></div>
+          </div>
+        </div>
+      </div>
+    </script>
+
+    <script id="achievement-template" type="text/template">
+      <div class="achievement" id="achievement-{{id}}" data-completed="{{completed}}">
+        <div class="achievement-icon">
+          <span>{{icon}}</span>
+        </div>
+        <div class="achievement-info">
+          <h4>{{name}}</h4>
+          <p>{{description}}</p>
+          <div class="achievement-progress" style="display: {{progressDisplay}}">
+            <div class="achievement-progress-bar">
+              <div class="achievement-progress-fill" style="width: {{progressPercent}}%"></div>
+            </div>
+            <span class="achievement-progress-text">{{progress}}/{{target}}</span>
+          </div>
+        </div>
+        <div class="achievement-reward" style="display: {{rewardDisplay}}">
+          <span>{{reward}}</span>
+        </div>
+      </div>
+    </script>
+
+    <!-- Game Scripts -->
+    <script type="module" src="index.js"></script>
+  </body>
+</html>
