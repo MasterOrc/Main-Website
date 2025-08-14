@@ -386,6 +386,50 @@ body {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 }
 
+/* Audio Controls */
+.audio-controls {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-left: 10px;
+  padding-left: 10px;
+  border-left: 1px solid var(--border-color);
+}
+
+.audio-button {
+  padding: 8px 12px;
+  font-size: 16px;
+  border-radius: 6px;
+  border: 2px solid var(--border-color);
+  background: var(--bg-dark);
+  color: var(--text-light);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 40px;
+  height: 40px;
+}
+
+.audio-button:hover {
+  background: var(--primary-color);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.audio-button.disabled {
+  opacity: 0.6;
+  background: rgba(120, 120, 120, 0.3);
+  border-color: rgba(120, 120, 120, 0.5);
+}
+
+.audio-button.disabled:hover {
+  transform: none;
+  box-shadow: none;
+}
+
 /* Enhanced Notification System */
 .notification-container {
   position: fixed;
@@ -701,5 +745,24 @@ body {
   .texts {
     flex-direction: column;
     gap: 20px;
+  }
+  
+  /* Mobile audio controls */
+  .util-buttons {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  
+  .audio-controls {
+    margin-left: 0;
+    padding-left: 0;
+    border-left: none;
+    margin-top: 8px;
+  }
+  
+  .audio-button {
+    min-width: 36px;
+    height: 36px;
+    font-size: 14px;
   }
 }

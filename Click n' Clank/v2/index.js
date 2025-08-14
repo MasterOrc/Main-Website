@@ -1,6 +1,7 @@
 import { powerUpIntervals, upgrades } from "./Constants/upgrades.js";
 import AchievementManager from './modules/achievements.js';
 import animationManager from './modules/animations.js';
+import audioManager from './modules/audio.js';
 import { 
   showNotification, 
   showUpgradeSuccess, 
@@ -31,11 +32,6 @@ let luckFactor = 1;
 // Initialize managers
 const achievementManager = new AchievementManager();
 
-// Enhanced game mechanics
-const bgm = new Audio("./assets/Audio/bgm.mp3");
-bgm.volume = 0.05;
-bgm.loop = true;
-
 // Initialize animations
 animationManager.initializeAnimations();
 
@@ -45,10 +41,8 @@ setTimeout(() => {
 }, 500);
 
 function incrementGear(event) {
-  // Play clicking sound
-  const clickingSound = new Audio("./assets/Audio/click.wav");
-  clickingSound.volume = 0.3;
-  clickingSound.play().catch(() => {});
+  // Play clicking sound using audio manager
+  audioManager.playSound('click');
 
   // Check for critical hit
   const isCritical = animationManager.shouldCriticalHit() * luckFactor > Math.random();
@@ -96,10 +90,8 @@ function buyUpgrade(upgradeName) {
   const actualCost = mu.parsedCost * costReductionFactor;
 
   if (parsedGear >= actualCost) {
-    // Play upgrade sound
-    const upgradeSound = new Audio("./assets/Audio/upgrade.mp3");
-    upgradeSound.volume = 0.1;
-    upgradeSound.play().catch(() => {});
+    // Play upgrade sound using audio manager
+    audioManager.playSound('upgrade', 0.1);
 
     // Deduct cost
     parsedGear -= actualCost;
@@ -513,3 +505,4 @@ window.load = load;
 window.resetGame = resetGame;
 window.toggleAchievements = toggleAchievements;
 window.parsedGear = parsedGear;
+window.audioManager = audioManager;
