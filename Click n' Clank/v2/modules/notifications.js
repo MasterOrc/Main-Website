@@ -1,3 +1,5 @@
+import audioManager from './audio.js';
+
 class NotificationManager {
   constructor() {
     this.container = document.getElementById('notification-container');
@@ -74,13 +76,8 @@ class NotificationManager {
   }
 
   playAchievementSound() {
-    try {
-      const audio = new Audio('./assets/Audio/upgrade.mp3');
-      audio.volume = 0.3;
-      audio.play().catch(e => console.log('Could not play achievement sound:', e));
-    } catch (error) {
-      console.log('Achievement sound not available');
-    }
+    // Use audio manager for consistent sound handling
+    audioManager.playSound('upgrade', 0.3);
   }
 
   clear() {

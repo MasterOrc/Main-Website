@@ -1,6 +1,8 @@
 import { powerUpIntervals, upgrades } from "./Constants/upgrades.js";
 import AchievementManager from './modules/achievements.js';
 import animationManager from './modules/animations.js';
+import audioManager from './modules/audio.js';
+import prestigeManager from './modules/prestige.js';
 import { 
   showNotification, 
   showUpgradeSuccess, 
@@ -31,10 +33,77 @@ let luckFactor = 1;
 // Initialize managers
 const achievementManager = new AchievementManager();
 
-// Enhanced game mechanics
-const bgm = new Audio("./assets/Audio/bgm.mp3");
-bgm.volume = 0.05;
-bgm.loop = true;
+// Apply prestige bonuses on game start
+applyPrestigeBonuses();
+
+/**
+ * Apply prestige bonuses to game variables
+ */
+function applyPrestigeBonuses() {
+  const bonuses = prestigeManager.getPrestigeBonuses();
+  
+  // Apply click multiplier to base gear per click
+  const baseGearsPerClick = 1;
+  gears_per_click = baseGearsPerClick * bonuses.clickMultiplier;
+  
+  // Apply global multiplier bonus
+  globalMultiplier *= bonuses.gearMultiplier;
+  
+  // Apply cost reduction
+  costReductionFactor *= bonuses.costReduction;
+  
+  // Add starting gears if this is a fresh prestige
+  if (bonuses.startingGears > 0 && parsedGear === 0) {
+    parsedGear += bonuses.startingGears;
+    gear.innerHTML = Math.round(parsedGear);
+  }
+  
+  // Apply critical hit chance bonus
+  animationManager.updateCriticalHitChance(animationManager.criticalHitChance + bonuses.criticalChance);
+  
+  // Apply luck factor enhancement
+  luckFactor *= bonuses.passiveBoost;
+  
+  // Apply time acceleration for prestige time warp
+  timeAccelerationFactor *= bonuses.timeWarp;
+  
+  // Update displays
+  updateDisplays();
+}
+
+/**
+ * Execute prestige reset - called by prestige manager
+ */
+function executePrestige() {
+  // Reset core game state but keep achievements and prestige data
+  parsedGear = 0;
+  gears_per_click = 1;
+  gears_per_second = 0;
+  globalMultiplier = 1;
+  costReductionFactor = 1;
+  timeAccelerationFactor = 1;
+  autoClickerLevel = 0;
+  luckFactor = 1;
+  
+  // Reset upgrades but keep the structure
+  upgrades.forEach(upgrade => {
+    upgrade.level.innerHTML = "0";
+    // Reset costs to base values would need to be handled in upgrades.js
+    // For now, reload should handle this properly
+  });
+  
+  // Update display
+  gear.innerHTML = "0";
+  updateDisplays();
+  
+  // Reapply prestige bonuses
+  setTimeout(() => {
+    applyPrestigeBonuses();
+  }, 100);
+  
+  // Show completion message
+  showNotification("Prestige complete! Your bonuses are now active!", "success", 4000);
+}
 
 // Initialize animations
 animationManager.initializeAnimations();
@@ -45,14 +114,16 @@ setTimeout(() => {
 }, 500);
 
 function incrementGear(event) {
-  // Play clicking sound
-  const clickingSound = new Audio("./assets/Audio/click.wav");
-  clickingSound.volume = 0.3;
-  clickingSound.play().catch(() => {});
+  // Play clicking sound using audio manager
+  audioManager.playSound('click');
 
-  // Check for critical hit
-  const isCritical = animationManager.shouldCriticalHit() * luckFactor > Math.random();
-  let clickAmount = gears_per_click * globalMultiplier;
+  // Get prestige bonuses for critical hit calculation
+  const bonuses = prestigeManager.getPrestigeBonuses();
+  const enhancedCritChance = animationManager.criticalHitChance + bonuses.criticalChance;
+  
+  // Check for critical hit with prestige bonus
+  const isCritical = enhancedCritChance * luckFactor > Math.random();
+  let clickAmount = gears_per_click * globalMultiplier * bonuses.clickMultiplier;
   
   if (isCritical) {
     clickAmount *= 2; // Critical hits do 2x damage
@@ -92,14 +163,13 @@ function buyUpgrade(upgradeName) {
   const nextLevelDiv = document.getElementById(`${mu.name}-next-level`);
   const nextLevelP = document.getElementById(`${mu.name}-next-p`);
 
-  // Calculate actual cost with reductions
-  const actualCost = mu.parsedCost * costReductionFactor;
+  // Calculate actual cost with reductions and prestige bonuses
+  const bonuses = prestigeManager.getPrestigeBonuses();
+  const actualCost = mu.parsedCost * costReductionFactor * bonuses.costReduction;
 
   if (parsedGear >= actualCost) {
-    // Play upgrade sound
-    const upgradeSound = new Audio("./assets/Audio/upgrade.mp3");
-    upgradeSound.volume = 0.1;
-    upgradeSound.play().catch(() => {});
+    // Play upgrade sound using audio manager
+    audioManager.playSound('upgrade', 0.1);
 
     // Deduct cost
     parsedGear -= actualCost;
@@ -244,12 +314,17 @@ function applySpecialUpgradeEffects(upgrade, powerUpIndex) {
 }
 
 function updateDisplays() {
-  // Update stats display
-  gears_per_clickText.innerHTML = Math.round(gears_per_click * globalMultiplier);
-  gears_per_secondText.innerHTML = Math.round(gears_per_second * globalMultiplier * timeAccelerationFactor);
+  const bonuses = prestigeManager.getPrestigeBonuses();
+  
+  // Update stats display with prestige bonuses
+  gears_per_clickText.innerHTML = Math.round(gears_per_click * globalMultiplier * bonuses.clickMultiplier);
+  gears_per_secondText.innerHTML = Math.round(gears_per_second * globalMultiplier * timeAccelerationFactor * bonuses.passiveBoost);
   
   // Update achievement stats
-  achievementManager.updateStats('gears_per_second', gears_per_second * globalMultiplier * timeAccelerationFactor);
+  achievementManager.updateStats('gears_per_second', gears_per_second * globalMultiplier * timeAccelerationFactor * bonuses.passiveBoost);
+  
+  // Update prestige display
+  prestigeManager.updatePrestigeDisplay();
 }
 
 function updateMultiplierDisplay() {
@@ -265,9 +340,11 @@ function updateMultiplierDisplay() {
 }
 
 function updateUpgradeAffordability() {
+  const bonuses = prestigeManager.getPrestigeBonuses();
+  
   upgrades.forEach(upgrade => {
     const upgradeElement = document.getElementById(`${upgrade.name}-upgrade`);
-    const actualCost = upgrade.parsedCost * costReductionFactor;
+    const actualCost = upgrade.parsedCost * costReductionFactor * bonuses.costReduction;
     
     if (upgradeElement) {
       if (parsedGear >= actualCost) {
@@ -299,7 +376,8 @@ function processAutoClicker() {
 // Enhanced passive income with time acceleration
 function processPassiveIncome() {
   if (gears_per_second > 0) {
-    const passiveAmount = (gears_per_second * globalMultiplier * timeAccelerationFactor) / 10;
+    const bonuses = prestigeManager.getPrestigeBonuses();
+    const passiveAmount = (gears_per_second * globalMultiplier * timeAccelerationFactor * bonuses.passiveBoost) / 10;
     parsedGear += passiveAmount;
     totalGears = Math.max(totalGears, parsedGear);
     gear.innerHTML = Math.round(parsedGear);
@@ -396,6 +474,9 @@ function load() {
     gear.innerHTML = Math.round(parsedGear);
     updateDisplays();
     updateMultiplierDisplay();
+    
+    // Reapply prestige bonuses after loading
+    applyPrestigeBonuses();
     
     showLoadSuccess();
   } catch (error) {
@@ -513,3 +594,10 @@ window.load = load;
 window.resetGame = resetGame;
 window.toggleAchievements = toggleAchievements;
 window.parsedGear = parsedGear;
+window.audioManager = audioManager;
+window.prestigeManager = prestigeManager;
+window.executePrestige = executePrestige;
+window.applyPrestigeBonuses = applyPrestigeBonuses;
+window.upgrades = upgrades;
+window.totalGears = totalGears;
+window.gears_per_second = gears_per_second;
