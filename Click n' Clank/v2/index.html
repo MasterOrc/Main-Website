@@ -59,13 +59,8 @@
         <button class="util-button" onclick="save()">Save</button>
         <button class="util-button" onclick="load()">Load</button>
         <button class="util-button" onclick="toggleAchievements()">Achievements</button>
+        <button class="util-button" onclick="toggleSettings()">Settings</button>
         <button class="util-button" onclick="resetGame()">Reset</button>
-        
-        <!-- Audio Control Buttons -->
-        <div class="audio-controls">
-          <button id="music-toggle" class="audio-button" onclick="audioManager.toggleMusic()" title="Toggle Music">🎵</button>
-          <button id="sound-toggle" class="audio-button" onclick="audioManager.toggleSound()" title="Toggle Sound">🔊</button>
-        </div>
       </div>
 
       <!-- Achievements Panel -->
@@ -81,6 +76,47 @@
           </div>
         </div>
         <div class="achievements-list" id="achievements-list"></div>
+      </div>
+
+      <!-- Settings Modal -->
+      <div id="settings-modal" class="settings-modal">
+        <div class="settings-header">
+          <h2>Settings</h2>
+          <button class="close-settings" onclick="toggleSettings()">×</button>
+        </div>
+        <div class="settings-content">
+          <!-- Audio Settings -->
+          <div class="settings-section">
+            <h3>Audio</h3>
+            <div class="setting-item">
+              <label for="music-volume">Music Volume:</label>
+              <input type="range" id="music-volume" min="0" max="100" value="50" oninput="audioManager.setMusicVolume(this.value / 100)">
+              <span id="music-volume-display">50%</span>
+            </div>
+            <div class="setting-item">
+              <label for="sound-volume">Sound Effects Volume:</label>
+              <input type="range" id="sound-volume" min="0" max="100" value="50" oninput="audioManager.setSoundVolume(this.value / 100)">
+              <span id="sound-volume-display">50%</span>
+            </div>
+            <div class="setting-item">
+              <button id="music-mute" class="setting-button" onclick="audioManager.toggleMusic()">Toggle Music</button>
+              <button id="sound-mute" class="setting-button" onclick="audioManager.toggleSound()">Toggle SFX</button>
+            </div>
+          </div>
+          
+          <!-- Game Settings -->
+          <div class="settings-section">
+            <h3>Display</h3>
+            <div class="setting-item">
+              <label for="show-particles">Show Particle Effects:</label>
+              <input type="checkbox" id="show-particles" checked>
+            </div>
+            <div class="setting-item">
+              <label for="show-notifications">Show Notifications:</label>
+              <input type="checkbox" id="show-notifications" checked>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- Enhanced Notification System -->
