@@ -174,14 +174,58 @@ class AchievementManager {
     const rewardText = achievement.reward.toLowerCase();
     
     if (rewardText.includes('gears') && rewardText.match(/\d+/)) {
+      // Convert flat gear rewards to click multiplier bonuses
       const gearReward = parseInt(rewardText.match(/\d+/)[0]);
-      window.parsedGear += gearReward;
-      document.querySelector(".gear-cost").innerHTML = Math.round(window.parsedGear);
-      showNotification(`Received ${gearReward} gears from achievement!`, 'success');
+      // Convert to a multiplier bonus: small rewards = 1.1x, larger rewards = more multiplier
+      const multiplierBonus = 1 + (gearReward / 1000); // 10 gears = 1.01x, 100 gears = 1.1x, etc.
+      
+      // Access the global click multiplier
+      if (typeof window.achievementClickMultiplier === 'undefined') {
+        window.achievementClickMultiplier = 1;
+      }
+      window.achievementClickMultiplier *= multiplierBonus;
+      
+      // Update the click multiplier display
+      this.updateClickMultiplierDisplay();
+      
+      showNotification(`Click Power +${((multiplierBonus - 1) * 100).toFixed(1)}% from achievement!`, 'success');
+    } else if (rewardText.includes('click multiplier')) {
+      // Handle explicit click multiplier rewards
+      const multiplierMatch = rewardText.match(/(\d+)x/);
+      if (multiplierMatch) {
+        const multiplier = parseFloat(multiplierMatch[1]);
+        if (typeof window.achievementClickMultiplier === 'undefined') {
+          window.achievementClickMultiplier = 1;
+        }
+        window.achievementClickMultiplier *= multiplier;
+        this.updateClickMultiplierDisplay();
+        showNotification(`Click Power x${multiplier} from achievement!`, 'success');
+      }
+    } else if (rewardText.includes('% all production')) {
+      // Handle global production bonuses
+      const percentMatch = rewardText.match(/(\d+)%/);
+      if (percentMatch) {
+        const percent = parseFloat(percentMatch[1]) / 100;
+        // Need to access the global multiplier from main game
+        if (typeof window.globalMultiplier !== 'undefined') {
+          window.globalMultiplier *= (1 + percent);
+        }
+        showNotification(`All Production +${percentMatch[1]}% from achievement!`, 'success');
+      }
     }
     
     // Other reward types would be applied here
-    // This is where you'd implement multiplier bonuses, efficiency boosts, etc.
+    // This is where you'd implement efficiency boosts, etc.
+  }
+
+  /**
+   * Update the click multiplier display in the UI
+   */
+  updateClickMultiplierDisplay() {
+    const multiplierElement = document.getElementById('click-multiplier-value');
+    if (multiplierElement && typeof window.achievementClickMultiplier !== 'undefined') {
+      multiplierElement.textContent = window.achievementClickMultiplier.toFixed(1);
+    }
   }
 
   updateStats(type, value, additionalData = {}) {

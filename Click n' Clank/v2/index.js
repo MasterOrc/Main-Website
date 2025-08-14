@@ -29,6 +29,7 @@ let costReductionFactor = 1;
 let timeAccelerationFactor = 1;
 let autoClickerLevel = 0;
 let luckFactor = 1;
+let achievementClickMultiplier = 1; // Achievement-based click power multiplier
 
 // Initialize managers
 const achievementManager = new AchievementManager();
@@ -84,6 +85,7 @@ function executePrestige() {
   timeAccelerationFactor = 1;
   autoClickerLevel = 0;
   luckFactor = 1;
+  // Note: achievementClickMultiplier is NOT reset as achievements persist through prestige
   
   // Reset upgrades but keep the structure
   upgrades.forEach(upgrade => {
@@ -123,7 +125,8 @@ function incrementGear(event) {
   
   // Check for critical hit with prestige bonus
   const isCritical = enhancedCritChance * luckFactor > Math.random();
-  let clickAmount = gears_per_click * globalMultiplier * bonuses.clickMultiplier;
+  const currentAchievementMultiplier = window.achievementClickMultiplier || 1;
+  let clickAmount = gears_per_click * globalMultiplier * bonuses.clickMultiplier * currentAchievementMultiplier;
   
   if (isCritical) {
     clickAmount *= 2; // Critical hits do 2x damage
@@ -344,7 +347,10 @@ function updateUpgradeAffordability() {
   
   upgrades.forEach(upgrade => {
     const upgradeElement = document.getElementById(`${upgrade.name}-upgrade`);
-    const actualCost = upgrade.parsedCost * costReductionFactor * bonuses.costReduction;
+    // Use the displayed cost from the UI instead of the cached parsedCost
+    // since parsedCost gets modified during purchases
+    const displayedCost = parseFloat(upgrade.cost.innerHTML);
+    const actualCost = displayedCost * costReductionFactor * bonuses.costReduction;
     
     if (upgradeElement) {
       if (parsedGear >= actualCost) {
@@ -575,6 +581,27 @@ function toggleAchievements() {
   panel.classList.toggle('open');
 }
 
+// Settings modal toggle
+function toggleSettings() {
+  const modal = document.getElementById('settings-modal');
+  modal.classList.toggle('open');
+  
+  // Update volume displays when opening
+  if (modal.classList.contains('open')) {
+    updateSettingsDisplay();
+  }
+}
+
+// Update settings display
+function updateSettingsDisplay() {
+  const settings = audioManager.getSettings();
+  
+  document.getElementById('music-volume').value = settings.musicVolume * 100;
+  document.getElementById('sound-volume').value = settings.soundVolume * 100;
+  document.getElementById('music-volume-display').textContent = Math.round(settings.musicVolume * 100) + '%';
+  document.getElementById('sound-volume-display').textContent = Math.round(settings.soundVolume * 100) + '%';
+}
+
 // Auto-save every 3 minutes
 setInterval(() => {
   save();
@@ -593,6 +620,11 @@ window.save = save;
 window.load = load;
 window.resetGame = resetGame;
 window.toggleAchievements = toggleAchievements;
+window.toggleSettings = toggleSettings;
+
+// Global variable exports for modules
+window.achievementClickMultiplier = achievementClickMultiplier;
+window.globalMultiplier = globalMultiplier;
 window.parsedGear = parsedGear;
 window.audioManager = audioManager;
 window.prestigeManager = prestigeManager;

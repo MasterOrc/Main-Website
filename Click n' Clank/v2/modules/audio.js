@@ -137,6 +137,12 @@ class AudioManager {
       this.backgroundMusic.volume = this.settings.musicVolume;
     }
     this.saveSettings();
+    
+    // Update UI display
+    const display = document.getElementById('music-volume-display');
+    if (display) {
+      display.textContent = Math.round(this.settings.musicVolume * 100) + '%';
+    }
   }
 
   /**
@@ -150,6 +156,12 @@ class AudioManager {
       audio.volume = this.settings.soundVolume;
     });
     this.saveSettings();
+    
+    // Update UI display
+    const display = document.getElementById('sound-volume-display');
+    if (display) {
+      display.textContent = Math.round(this.settings.soundVolume * 100) + '%';
+    }
   }
 
   /**
