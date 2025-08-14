@@ -143,6 +143,9 @@ function incrementGear(event) {
   totalGears = Math.max(totalGears, parsedGear);
   gear.innerHTML = Math.round(parsedGear);
   
+  // Sync global variables for modules
+  syncGlobalVariables();
+  
   // Animate gear update
   animationManager.animateGearUpdate(parsedGear, oldGear);
   
@@ -244,6 +247,9 @@ function buyUpgrade(upgradeName) {
     // Update displays
     updateDisplays();
     updateUpgradeAffordability();
+    
+    // Sync global variables for modules
+    syncGlobalVariables();
   } else {
     // Not enough gears
     showInsufficientFunds(actualCost);
@@ -387,6 +393,9 @@ function processPassiveIncome() {
     parsedGear += passiveAmount;
     totalGears = Math.max(totalGears, parsedGear);
     gear.innerHTML = Math.round(parsedGear);
+    
+    // Sync global variables for modules
+    syncGlobalVariables();
     
     // Track idle gears for achievements
     achievementManager.trackIdleGears(passiveAmount);
@@ -623,9 +632,17 @@ window.toggleAchievements = toggleAchievements;
 window.toggleSettings = toggleSettings;
 
 // Global variable exports for modules
-window.achievementClickMultiplier = achievementClickMultiplier;
-window.globalMultiplier = globalMultiplier;
-window.parsedGear = parsedGear;
+function syncGlobalVariables() {
+  window.achievementClickMultiplier = achievementClickMultiplier;
+  window.globalMultiplier = globalMultiplier;
+  window.parsedGear = parsedGear;
+  window.totalGears = totalGears;
+  window.gears_per_second = gears_per_second;
+  window.upgrades = upgrades;
+}
+
+// Initial sync
+syncGlobalVariables();
 window.audioManager = audioManager;
 window.prestigeManager = prestigeManager;
 window.executePrestige = executePrestige;

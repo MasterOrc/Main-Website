@@ -19,6 +19,7 @@ class PrestigeManager {
   constructor() {
     this.prestigeState = { ...DEFAULT_PRESTIGE_STATE };
     this.isPrestigeModalOpen = false;
+    this.updateInterval = null; // For live updates
     
     // Bind methods for HTML event handlers
     this.togglePrestigeModal = this.togglePrestigeModal.bind(this);
@@ -222,6 +223,16 @@ class PrestigeManager {
     
     if (this.isPrestigeModalOpen) {
       this.updatePrestigeDisplay();
+      // Start live updates every second
+      this.updateInterval = setInterval(() => {
+        this.updatePrestigeDisplay();
+      }, 1000);
+    } else {
+      // Stop live updates when modal is closed
+      if (this.updateInterval) {
+        clearInterval(this.updateInterval);
+        this.updateInterval = null;
+      }
     }
   }
 
