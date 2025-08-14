@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gears - Click n' Clank v2</title>
+    <link rel="icon" type="image/x-icon" href="../assets/Gear.png">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Main Game Container -->
+    <main class="game-container">
+        <!-- Header Section -->
+        <header class="game-header">
+            <h1>Click n' Clank v2</h1>
+            <div class="gear-counter">
+                <img src="../assets/Gear.png" alt="Gear" class="header-gear-icon">
+                <span id="gear-count" class="gear-amount">0</span>
+            </div>
+        </header>
+
+        <!-- Game Content -->
+        <div class="game-content">
+            <!-- Left Panel: Clicking Area -->
+            <section class="click-area">
+                <div class="gear-display">
+                    <div id="gear-container" class="gear-container">
+                        <img 
+                            id="main-gear" 
+                            src="../assets/Gear.png" 
+                            alt="Clickable Gear" 
+                            class="main-gear"
+                            draggable="false"
+                        >
+                    </div>
+                </div>
+                
+                <!-- Stats Display -->
+                <div class="stats-panel">
+                    <div class="stat-item">
+                        <span class="stat-label">Gears per Click:</span>
+                        <span id="gears-per-click" class="stat-value">1</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Gears per Second:</span>
+                        <span id="gears-per-second" class="stat-value">0</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Right Panel: Upgrades -->
+            <section class="upgrades-area">
+                <h2>Upgrades</h2>
+                <div id="upgrades-container" class="upgrades-list">
+                    <!-- Upgrades will be dynamically generated -->
+                </div>
+            </section>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="action-buttons">
+            <button id="save-btn" class="action-btn save-btn">Save Game</button>
+            <button id="load-btn" class="action-btn load-btn">Load Game</button>
+            <button id="gamble-btn" class="action-btn gamble-btn">🎲 Gamble</button>
+        </div>
+
+        <!-- Notification System -->
+        <div id="notification" class="notification hidden">
+            <span id="notification-text"></span>
+        </div>
+    </main>
+
+    <!-- Gambling Modal -->
+    <div id="gambling-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>🎲 Gear Gambling</h2>
+                <button id="close-modal" class="close-btn">&times;</button>
+            </div>
+            
+            <div class="modal-body">
+                <p class="modal-description">
+                    Risk your gears for a chance to multiply them! Choose your wager and test your luck.
+                </p>
+                
+                <div class="gambling-controls">
+                    <div class="wager-section">
+                        <label for="wager-input">Wager Amount:</label>
+                        <div class="wager-input-group">
+                            <input type="number" id="wager-input" min="1" max="0" value="10" class="wager-input">
+                            <div class="wager-buttons">
+                                <button class="wager-btn" data-percentage="10">10%</button>
+                                <button class="wager-btn" data-percentage="25">25%</button>
+                                <button class="wager-btn" data-percentage="50">50%</button>
+                                <button class="wager-btn" data-percentage="100">All In</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="odds-section">
+                        <div class="odds-option">
+                            <input type="radio" id="safe-bet" name="odds" value="safe" checked>
+                            <label for="safe-bet">
+                                <span class="odds-title">Safe Bet</span>
+                                <span class="odds-desc">70% chance to win 1.5x</span>
+                            </label>
+                        </div>
+                        <div class="odds-option">
+                            <input type="radio" id="risky-bet" name="odds" value="risky">
+                            <label for="risky-bet">
+                                <span class="odds-title">Risky Bet</span>
+                                <span class="odds-desc">40% chance to win 3x</span>
+                            </label>
+                        </div>
+                        <div class="odds-option">
+                            <input type="radio" id="extreme-bet" name="odds" value="extreme">
+                            <label for="extreme-bet">
+                                <span class="odds-title">Extreme Bet</span>
+                                <span class="odds-desc">15% chance to win 8x</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <button id="place-bet" class="place-bet-btn" disabled>Place Bet</button>
+                </div>
+
+                <div id="gambling-result" class="gambling-result hidden">
+                    <!-- Results will be shown here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Game Scripts -->
+    <script type="module" src="main.js"></script>
+</body>
+</html>
