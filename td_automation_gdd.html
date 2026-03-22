@@ -1,0 +1,1581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IRONFRONT — Game Design Document</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@300;400;600;700&family=Orbitron:wght@400;700;900&display=swap');
+
+  :root {
+    --bg: #080c10;
+    --bg2: #0d1318;
+    --bg3: #111820;
+    --panel: #0a1219;
+    --border: #1e3a4a;
+    --accent: #00e5ff;
+    --accent2: #ff6b00;
+    --accent3: #39ff14;
+    --danger: #ff2244;
+    --text: #c8dde8;
+    --muted: #4a6a7a;
+    --gold: #ffd700;
+    --purple: #a855f7;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  /* Scanline overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.03) 2px,
+      rgba(0,0,0,0.03) 4px
+    );
+    pointer-events: none;
+    z-index: 1000;
+  }
+
+  /* Grid background */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,229,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,229,255,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 24px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* HEADER */
+  header {
+    padding: 60px 0 40px;
+    text-align: center;
+    position: relative;
+  }
+
+  .game-title {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(48px, 8vw, 96px);
+    font-weight: 900;
+    letter-spacing: 0.15em;
+    color: var(--accent);
+    text-shadow: 0 0 30px rgba(0,229,255,0.5), 0 0 60px rgba(0,229,255,0.2);
+    animation: titlePulse 3s ease-in-out infinite;
+  }
+
+  @keyframes titlePulse {
+    0%, 100% { text-shadow: 0 0 30px rgba(0,229,255,0.5), 0 0 60px rgba(0,229,255,0.2); }
+    50% { text-shadow: 0 0 50px rgba(0,229,255,0.8), 0 0 100px rgba(0,229,255,0.4); }
+  }
+
+  .game-subtitle {
+    font-family: 'Share Tech Mono', monospace;
+    color: var(--accent2);
+    font-size: 14px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    margin-top: 8px;
+  }
+
+  .version-badge {
+    display: inline-block;
+    background: rgba(0,229,255,0.1);
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    padding: 4px 12px;
+    letter-spacing: 0.2em;
+    margin-top: 16px;
+  }
+
+  /* NAV */
+  nav {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+    justify-content: center;
+    padding: 20px 0 40px;
+    position: sticky;
+    top: 0;
+    background: rgba(8,12,16,0.95);
+    backdrop-filter: blur(10px);
+    z-index: 100;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .nav-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    padding: 8px 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+  }
+
+  .nav-btn:hover, .nav-btn.active {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(0,229,255,0.05);
+  }
+
+  /* SECTIONS */
+  .section {
+    display: none;
+    animation: fadeIn 0.3s ease;
+    padding-bottom: 80px;
+  }
+
+  .section.active { display: block; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 40px;
+    padding: 32px 0 20px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .section-icon {
+    font-size: 32px;
+  }
+
+  .section-title {
+    font-family: 'Orbitron', monospace;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: 0.1em;
+  }
+
+  .section-desc {
+    color: var(--muted);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.15em;
+  }
+
+  /* CARDS */
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    padding: 20px;
+    position: relative;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+
+  .card:hover {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 3px; height: 100%;
+    background: var(--card-accent, var(--accent));
+  }
+
+  .card-title {
+    font-family: 'Orbitron', monospace;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--card-accent, var(--accent));
+    letter-spacing: 0.1em;
+    margin-bottom: 8px;
+  }
+
+  .card-body {
+    font-size: 14px;
+    color: var(--text);
+    line-height: 1.7;
+  }
+
+  .card-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 12px;
+  }
+
+  .tag {
+    background: rgba(0,229,255,0.08);
+    border: 1px solid rgba(0,229,255,0.2);
+    color: var(--accent);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    padding: 2px 8px;
+    letter-spacing: 0.1em;
+  }
+
+  .tag.orange { background: rgba(255,107,0,0.08); border-color: rgba(255,107,0,0.3); color: var(--accent2); }
+  .tag.green { background: rgba(57,255,20,0.08); border-color: rgba(57,255,20,0.3); color: var(--accent3); }
+  .tag.red { background: rgba(255,34,68,0.08); border-color: rgba(255,34,68,0.3); color: var(--danger); }
+  .tag.gold { background: rgba(255,215,0,0.08); border-color: rgba(255,215,0,0.3); color: var(--gold); }
+  .tag.purple { background: rgba(168,85,247,0.08); border-color: rgba(168,85,247,0.3); color: var(--purple); }
+
+  /* TOWER CLASSES */
+  .tower-class {
+    margin-bottom: 40px;
+  }
+
+  .class-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 20px;
+    margin-bottom: 16px;
+    background: var(--panel);
+    border-left: 4px solid var(--class-color, var(--accent));
+  }
+
+  .class-name {
+    font-family: 'Orbitron', monospace;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--class-color, var(--accent));
+  }
+
+  .class-desc { font-size: 13px; color: var(--muted); }
+
+  .tower-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 12px;
+  }
+
+  .tower-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    padding: 16px;
+    position: relative;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .tower-card:hover {
+    border-color: var(--class-color, var(--accent));
+    background: var(--bg3);
+  }
+
+  .tower-card .tower-name {
+    font-family: 'Orbitron', monospace;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--class-color, var(--accent));
+    margin-bottom: 6px;
+  }
+
+  .tower-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px;
+    margin-top: 10px;
+  }
+
+  .stat {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+  }
+
+  .stat span {
+    color: var(--text);
+  }
+
+  /* AUTOMATION FLOW */
+  .flow-diagram {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 24px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    margin-bottom: 24px;
+    overflow-x: auto;
+  }
+
+  .flow-node {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    padding: 10px 16px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 12px;
+    text-align: center;
+    white-space: nowrap;
+    min-width: 100px;
+    transition: border-color 0.2s;
+  }
+
+  .flow-node:hover { border-color: var(--accent); }
+
+  .flow-node.resource { border-color: var(--accent3); color: var(--accent3); }
+  .flow-node.machine { border-color: var(--accent); color: var(--accent); }
+  .flow-node.output { border-color: var(--gold); color: var(--gold); }
+  .flow-node.conveyor { border-color: var(--muted); color: var(--muted); font-size: 10px; padding: 6px 12px; }
+
+  .flow-arrow {
+    color: var(--muted);
+    font-size: 18px;
+  }
+
+  /* RESOURCE TABLE */
+  .resource-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 32px;
+  }
+
+  .resource-table th {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    color: var(--accent);
+    text-transform: uppercase;
+    padding: 12px 16px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    background: var(--panel);
+  }
+
+  .resource-table td {
+    padding: 10px 16px;
+    font-size: 13px;
+    border-bottom: 1px solid rgba(30,58,74,0.5);
+  }
+
+  .resource-table tr:hover td {
+    background: rgba(0,229,255,0.03);
+  }
+
+  .rarity-common { color: var(--text); }
+  .rarity-uncommon { color: var(--accent3); }
+  .rarity-rare { color: var(--accent); }
+  .rarity-epic { color: var(--purple); }
+  .rarity-legendary { color: var(--gold); }
+
+  /* WAVE SYSTEM */
+  .wave-bar {
+    display: flex;
+    align-items: stretch;
+    gap: 2px;
+    margin-bottom: 8px;
+  }
+
+  .wave-segment {
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    color: rgba(255,255,255,0.7);
+    flex: var(--w, 1);
+  }
+
+  .ws-prep { background: rgba(57,255,20,0.15); border: 1px solid rgba(57,255,20,0.3); }
+  .ws-wave { background: rgba(255,34,68,0.2); border: 1px solid rgba(255,34,68,0.4); }
+  .ws-boss { background: rgba(255,107,0,0.25); border: 1px solid rgba(255,107,0,0.5); }
+  .ws-bonus { background: rgba(255,215,0,0.15); border: 1px solid rgba(255,215,0,0.3); }
+
+  /* PROGRESS BAR */
+  .prog-bar-container {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    height: 8px;
+    margin-top: 4px;
+  }
+  .prog-bar {
+    height: 100%;
+    background: var(--bar-color, var(--accent));
+    box-shadow: 0 0 8px var(--bar-color, var(--accent));
+  }
+
+  /* OTL SECTION */
+  .otl-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 12px;
+    margin: 16px 0;
+  }
+
+  .otl-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    padding: 16px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .otl-card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 100px;
+    background: var(--otl-color);
+    opacity: 0.05;
+    border-radius: 50%;
+    filter: blur(20px);
+  }
+
+  .otl-name {
+    font-family: 'Orbitron', monospace;
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+
+  .otl-icon { font-size: 28px; margin-bottom: 8px; }
+  .otl-desc { font-size: 12px; color: var(--muted); line-height: 1.5; }
+
+  /* UPGRADE TREE */
+  .upgrade-tree {
+    display: flex;
+    gap: 24px;
+    overflow-x: auto;
+    padding: 16px 0;
+    align-items: flex-start;
+  }
+
+  .upgrade-tier {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 160px;
+  }
+
+  .upgrade-tier-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 0.2em;
+    text-align: center;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 4px;
+  }
+
+  .upgrade-node {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    padding: 10px 12px;
+    font-size: 12px;
+    transition: all 0.2s;
+    cursor: pointer;
+    position: relative;
+  }
+
+  .upgrade-node:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .upgrade-node.tier1 { border-left-color: var(--accent3); }
+  .upgrade-node.tier2 { border-left-color: var(--accent); }
+  .upgrade-node.tier3 { border-left-color: var(--accent2); }
+  .upgrade-node.tier4 { border-left-color: var(--gold); }
+
+  .upgrade-cost {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    color: var(--gold);
+    margin-top: 4px;
+  }
+
+  /* INFO BOX */
+  .info-box {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    padding: 16px 20px;
+    margin: 20px 0;
+    font-size: 14px;
+    line-height: 1.7;
+  }
+
+  .info-box.warning {
+    border-left-color: var(--accent2);
+  }
+
+  .info-box.idea {
+    border-left-color: var(--accent3);
+  }
+
+  .info-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--accent);
+    margin-bottom: 6px;
+    display: block;
+  }
+
+  .info-box.warning .info-label { color: var(--accent2); }
+  .info-box.idea .info-label { color: var(--accent3); }
+
+  /* TWO COL */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin: 20px 0;
+  }
+
+  @media (max-width: 640px) {
+    .two-col { grid-template-columns: 1fr; }
+  }
+
+  /* HEADING */
+  h2 {
+    font-family: 'Orbitron', monospace;
+    font-size: 20px;
+    color: var(--accent);
+    margin: 32px 0 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+    letter-spacing: 0.08em;
+  }
+
+  h3 {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text);
+    margin: 20px 0 10px;
+    letter-spacing: 0.05em;
+  }
+
+  p { margin-bottom: 12px; font-size: 15px; }
+
+  ul { margin-left: 20px; margin-bottom: 12px; }
+  li { font-size: 14px; margin-bottom: 4px; }
+
+  /* MONO TEXT */
+  .mono { font-family: 'Share Tech Mono', monospace; font-size: 13px; }
+
+  /* STATUS INDICATORS */
+  .status-dot {
+    display: inline-block;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    margin-right: 6px;
+    vertical-align: middle;
+  }
+  .dot-done { background: var(--accent3); box-shadow: 0 0 6px var(--accent3); }
+  .dot-wip { background: var(--gold); box-shadow: 0 0 6px var(--gold); }
+  .dot-idea { background: var(--muted); }
+
+  /* TOOLTIP */
+  [data-tip] { position: relative; cursor: help; }
+  [data-tip]:hover::after {
+    content: attr(data-tip);
+    position: absolute;
+    bottom: calc(100% + 6px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--bg3);
+    border: 1px solid var(--accent);
+    color: var(--text);
+    padding: 6px 10px;
+    font-size: 11px;
+    white-space: nowrap;
+    z-index: 200;
+    pointer-events: none;
+    font-family: 'Share Tech Mono', monospace;
+  }
+
+  /* ENEMY TABLE */
+  .enemy-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 10px;
+    margin: 16px 0;
+  }
+
+  .enemy-card {
+    background: var(--bg2);
+    border: 1px solid rgba(255,34,68,0.2);
+    padding: 14px;
+    transition: all 0.2s;
+  }
+
+  .enemy-card:hover {
+    border-color: var(--danger);
+    transform: scale(1.02);
+  }
+
+  .enemy-name {
+    font-family: 'Orbitron', monospace;
+    font-size: 11px;
+    color: var(--danger);
+    margin-bottom: 6px;
+    letter-spacing: 0.08em;
+  }
+
+  .enemy-type {
+    font-size: 11px;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+
+  /* MISC */
+  footer {
+    text-align: center;
+    padding: 40px;
+    border-top: 1px solid var(--border);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.15em;
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <div class="game-title">IRONFRONT</div>
+    <div class="game-subtitle">Tower Defense × Automation</div>
+    <div class="version-badge">GDD v0.1 — CONCEPT DRAFT</div>
+  </header>
+
+  <nav>
+    <button class="nav-btn active" onclick="showSection('overview')">Overview</button>
+    <button class="nav-btn" onclick="showSection('towers')">Towers</button>
+    <button class="nav-btn" onclick="showSection('automation')">Automation</button>
+    <button class="nav-btn" onclick="showSection('resources')">Resources</button>
+    <button class="nav-btn" onclick="showSection('enemies')">Enemies</button>
+    <button class="nav-btn" onclick="showSection('waves')">Wave System</button>
+    <button class="nav-btn" onclick="showSection('upgrades')">Upgrades</button>
+    <button class="nav-btn" onclick="showSection('ideas')">Ideas Backlog</button>
+  </nav>
+
+  <!-- OVERVIEW -->
+  <div class="section active" id="overview">
+    <div class="section-header">
+      <div class="section-icon">🗺</div>
+      <div>
+        <div class="section-title">Game Overview</div>
+        <div class="section-desc">// CORE CONCEPT & PILLARS</div>
+      </div>
+    </div>
+
+    <div class="info-box">
+      <span class="info-label">// CONCEPT SUMMARY</span>
+      IRONFRONT is a hybrid tower defense + factory automation game. Waves of enemies advance on your base — but you don't just place towers and wait. You build a <strong style="color:var(--accent)">live resource economy</strong> using conveyers, machines, and extractors that continuously fund and power your defenses. The tension comes from splitting attention: optimizing your factory pipeline <em>while</em> managing an active assault.
+    </div>
+
+    <h2>Core Pillars</h2>
+    <div class="card-grid">
+      <div class="card" style="--card-accent: var(--accent)">
+        <div class="card-title">⚔ ACTIVE DEFENSE</div>
+        <div class="card-body">Place and upgrade towers to stop enemy waves. Tower placement, range, synergies, and targeting priority all matter. No idle watching — constant adaptation is required.</div>
+        <div class="card-tags"><span class="tag">tower defense</span><span class="tag">strategy</span></div>
+      </div>
+      <div class="card" style="--card-accent: var(--accent2)">
+        <div class="card-title">⚙ FACTORY AUTOMATION</div>
+        <div class="card-body">Build conveyor networks, extractors, and processing machines to generate resources passively. Your factory runs in parallel with the defense — neglect it and you'll run dry.</div>
+        <div class="card-tags"><span class="tag orange">automation</span><span class="tag orange">economy</span></div>
+      </div>
+      <div class="card" style="--card-accent: var(--accent3)">
+        <div class="card-title">🔬 DEEP UPGRADES</div>
+        <div class="card-body">Every tower has a multi-tier upgrade tree. Specialize snipers into railguns or EMP bursters. Evolve your LMG into a minigun fortress. No two runs look the same.</div>
+        <div class="card-tags"><span class="tag green">progression</span><span class="tag green">replayability</span></div>
+      </div>
+      <div class="card" style="--card-accent: var(--gold)">
+        <div class="card-title">🛰 OTL SUPERWEAPONS</div>
+        <div class="card-body">Orbit-to-Land weapons (laser, missile, nuke, metal beam) are rare, resource-hungry, and devastating. Manage orbital cooldowns as your last line of defense.</div>
+        <div class="card-tags"><span class="tag gold">superweapon</span><span class="tag gold">orbital</span></div>
+      </div>
+    </div>
+
+    <h2>Game Loop</h2>
+    <div class="flow-diagram">
+      <div class="flow-node resource">Mine Resources</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node machine">Process / Craft</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node output">Build / Upgrade Towers</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node ws-wave" style="padding:10px 16px;font-family:'Share Tech Mono',monospace;font-size:12px;color:#fff;white-space:nowrap">Survive Wave</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node resource">Earn Loot</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node conveyor">REPEAT & SCALE</div>
+    </div>
+
+    <div class="two-col">
+      <div>
+        <h2>Map Layout</h2>
+        <div class="info-box idea">
+          <span class="info-label">// IDEA</span>
+          The map has two distinct zones:
+          <ul style="margin-top:8px">
+            <li><strong style="color:var(--accent3)">FACTORY ZONE</strong> — rear area where you lay down your automation infrastructure. Enemies don't reach here unless your front collapses.</li>
+            <li><strong style="color:var(--danger)">DEFENSE ZONE</strong> — enemy paths and tower placement area. Resource nodes scattered throughout create trade-offs.</li>
+          </ul>
+        </div>
+      </div>
+      <div>
+        <h2>Win / Lose Conditions</h2>
+        <ul style="margin-top:8px">
+          <li>❌ <strong>LOSE</strong> — Enemies reach your core and deplete its HP to 0</li>
+          <li>✅ <strong>WIN</strong> — Survive all waves including the final boss wave</li>
+          <li>⭐ <strong>BONUS</strong> — Optional objectives like "core never hit" or "no OTL used" for extra rewards</li>
+        </ul>
+        <div class="info-box warning" style="margin-top:16px">
+          <span class="info-label">// DESIGN NOTE</span>
+          Core HP being a limited resource (not just one-shot-lose) adds drama and comeback mechanics.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOWERS -->
+  <div class="section" id="towers">
+    <div class="section-header">
+      <div class="section-icon">🏗</div>
+      <div>
+        <div class="section-title">Tower Classes</div>
+        <div class="section-desc">// MILITARY · MELEE · RANGED</div>
+      </div>
+    </div>
+
+    <!-- MILITARY -->
+    <div class="tower-class" style="--class-color: var(--danger)">
+      <div class="class-header">
+        <span style="font-size:24px">🪖</span>
+        <div>
+          <div class="class-name">MILITARY CLASS</div>
+          <div class="class-desc">High-damage conventional weapons. Strong single-target or area suppression.</div>
+        </div>
+      </div>
+      <div class="tower-grid">
+        <div class="tower-card">
+          <div class="tower-name">SNIPER</div>
+          <div style="font-size:13px;color:var(--text)">Extreme range, high single-target damage. Slow fire rate. Can pierce through multiple enemies.</div>
+          <div class="tower-stats">
+            <div class="stat">DMG <span>HIGH</span></div>
+            <div class="stat">RANGE <span>MAX</span></div>
+            <div class="stat">RATE <span>SLOW</span></div>
+            <div class="stat">AOE <span>NONE</span></div>
+          </div>
+          <div class="card-tags" style="margin-top:10px"><span class="tag red">single target</span><span class="tag red">pierce</span></div>
+        </div>
+        <div class="tower-card">
+          <div class="tower-name">LMG</div>
+          <div style="font-size:13px;color:var(--text)">Sustained fire, medium range. Spin-up mechanic — increases rate of fire over time.</div>
+          <div class="tower-stats">
+            <div class="stat">DMG <span>MED</span></div>
+            <div class="stat">RANGE <span>MED</span></div>
+            <div class="stat">RATE <span>RAMP↑</span></div>
+            <div class="stat">AOE <span>NONE</span></div>
+          </div>
+          <div class="card-tags" style="margin-top:10px"><span class="tag red">sustained</span><span class="tag red">spin-up</span></div>
+        </div>
+        <div class="tower-card">
+          <div class="tower-name">AR (Assault Rifle)</div>
+          <div style="font-size:13px;color:var(--text)">Versatile all-rounder. Consistent damage at medium range. Good for early-game spine of defense.</div>
+          <div class="tower-stats">
+            <div class="stat">DMG <span>MED</span></div>
+            <div class="stat">RANGE <span>MED</span></div>
+            <div class="stat">RATE <span>MED</span></div>
+            <div class="stat">AOE <span>NONE</span></div>
+          </div>
+          <div class="card-tags" style="margin-top:10px"><span class="tag red">versatile</span></div>
+        </div>
+        <div class="tower-card">
+          <div class="tower-name">SHOTGUN</div>
+          <div style="font-size:13px;color:var(--text)">Short range, wide pellet spread. Devastating against clustered enemies. Weak against lone heavies.</div>
+          <div class="tower-stats">
+            <div class="stat">DMG <span>HIGH</span></div>
+            <div class="stat">RANGE <span>SHORT</span></div>
+            <div class="stat">RATE <span>SLOW</span></div>
+            <div class="stat">AOE <span>SPREAD</span></div>
+          </div>
+          <div class="card-tags" style="margin-top:10px"><span class="tag red">spread</span><span class="tag red">anti-swarm</span></div>
+        </div>
+        <div class="tower-card">
+          <div class="tower-name">EXPLOSIVES</div>
+          <div style="font-size:13px;color:var(--text)">Grenade launcher / mortar. Arc fire over walls. Area denial. Can damage structures if misplaced.</div>
+          <div class="tower-stats">
+            <div class="stat">DMG <span>V.HIGH</span></div>
+            <div class="stat">RANGE <span>MED</span></div>
+            <div class="stat">RATE <span>SLOW</span></div>
+            <div class="stat">AOE <span>BLAST</span></div>
+          </div>
+          <div class="card-tags" style="margin-top:10px"><span class="tag red">AOE</span><span class="tag red">area denial</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MELEE -->
+    <div class="tower-class" style="--class-color: var(--accent2)">
+      <div class="class-header">
+        <span style="font-size:24px">⚔️</span>
+        <div>
+          <div class="class-name">MELEE CLASS</div>
+          <div class="class-desc">Point-blank combat. Stops enemies from advancing, stuns, or crowd-controls. Best at choke points.</div>
+        </div>
+      </div>
+      <div class="tower-grid">
+        <div class="tower-card">
+          <div class="tower-name">SWORD</div>
+          <div style="font-size:13px;color:var(--text)">Slashing melee. Hits multiple enemies in an arc. Can be upgraded to deal bleed damage over time.</div>
+          <div class="tower-stats">
+            <div class="stat">DMG <span>HIGH</span></div>
+            <div class="stat">RANGE <span>MELEE</span></div>
+            <div class="stat">RATE <span>MED</span></div>
+            <div class="stat">AOE <span>ARC</span></div>
+          </div>
+          <div class="card-tags" style="margin-top:10px"><span class="tag orange">arc</span><span class="tag orange">bleed</span></div>
+        </div>
+        <div class="tower-card">
+          <div class="tower-name">PUNCH / BRAWLER</div>
+          <div style="font-size:13px;color:var(--text)">Rapid fist attacks. Stuns enemies briefly. Low damage per hit but high interrupt potential.</div>
+          <div class="tower-stats">
+            <div class="stat">DMG <span>LOW</span></div>
+            <div class="stat">RANGE <span>MELEE</span></div>
+            <div class="stat">RATE <span>FAST</span></div>
+            <div class="stat">AOE <span>NONE</span></div>
+          </div>
+          <div class="card-tags" style="margin-top:10px"><span class="tag orange">stun</span><span class="tag orange">interrupt</span></div>
+        </div>
+        <div class="tower-card">
+          <div class="tower-name">BAT / BLUNT</div>
+          <div style="font-size:13px;color:var(--text)">Heavy swing. Knocks enemies backward, disrupting their advance. Excellent at pushing back waves.</div>
+          <div class="tower-stats">
+            <div class="stat">DMG <span>MED</span></div>
+            <div class="stat">RANGE <span>MELEE</span></div>
+            <div class="stat">RATE <span>MED</span></div>
+            <div class="stat">AOE <span>KNOCKBACK</span></div>
+          </div>
+          <div class="card-tags" style="margin-top:10px"><span class="tag orange">knockback</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RANGED -->
+    <div class="tower-class" style="--class-color: var(--accent)">
+      <div class="class-header">
+        <span style="font-size:24px">🎯</span>
+        <div>
+          <div class="class-name">RANGED CLASS</div>
+          <div class="class-desc">Diverse projectile and energy weapons. Status effects, utility, and orbital superweapons.</div>
+        </div>
+      </div>
+      <div class="tower-grid">
+        <div class="tower-card">
+          <div class="tower-name">BOW & ARROW</div>
+          <div style="font-size:13px;color:var(--text)">Cheap early-game workhorse. Fast projectile, upgradeable to flaming, poison, or explosive tips.</div>
+          <div class="tower-stats">
+            <div class="stat">DMG <span>LOW</span></div>
+            <div class="stat">RANGE <span>LONG</span></div>
+            <div class="stat">RATE <span>FAST</span></div>
+            <div class="stat">AOE <span>NONE</span></div>
+          </div>
+          <div class="card-tags" style="margin-top:10px"><span class="tag">cheap</span><span class="tag">versatile</span></div>
+        </div>
+        <div class="tower-card">
+          <div class="tower-name">THROWING KNIFE</div>
+          <div style="font-size:13px;color:var(--text)">Can hit multiple targets in a line. High crit chance, applies bleed on hit.</div>
+          <div class="tower-stats">
+            <div class="stat">DMG <span>MED</span></div>
+            <div class="stat">RANGE <span>MED</span></div>
+            <div class="stat">RATE <span>MED</span></div>
+            <div class="stat">AOE <span>PIERCE</span></div>
+          </div>
+          <div class="card-tags" style="margin-top:10px"><span class="tag">pierce</span><span class="tag">crit</span></div>
+        </div>
+        <div class="tower-card">
+          <div class="tower-name">LASER</div>
+          <div style="font-size:13px;color:var(--text)">Continuous beam damage. Shreds through armor. Heats up and needs cooldown. Excellent vs. heavies.</div>
+          <div class="tower-stats">
+            <div class="stat">DMG <span>HIGH</span></div>
+            <div class="stat">RANGE <span>LONG</span></div>
+            <div class="stat">RATE <span>CONT.</span></div>
+            <div class="stat">AOE <span>BEAM</span></div>
+          </div>
+          <div class="card-tags" style="margin-top:10px"><span class="tag">anti-armor</span><span class="tag">heat</span></div>
+        </div>
+        <div class="tower-card">
+          <div class="tower-name">BOLA / NET</div>
+          <div style="font-size:13px;color:var(--text)">Utility tower. Snares and slows enemies. Doesn't deal damage — but makes other towers far more effective.</div>
+          <div class="tower-stats">
+            <div class="stat">DMG <span>NONE</span></div>
+            <div class="stat">RANGE <span>MED</span></div>
+            <div class="stat">RATE <span>MED</span></div>
+            <div class="stat">AOE <span>SNARE</span></div>
+          </div>
+          <div class="card-tags" style="margin-top:10px"><span class="tag">utility</span><span class="tag">slow</span><span class="tag">support</span></div>
+        </div>
+      </div>
+
+      <!-- OTL SECTION -->
+      <h2 style="margin-top:32px">🛰 OTL — Orbit To Land Weapons</h2>
+      <div class="info-box">
+        <span class="info-label">// SUPERWEAPONS</span>
+        OTL weapons are not placed like normal towers. They are <strong style="color:var(--gold)">orbital systems</strong> that must be unlocked, charged, and targeted manually. Each has a long cooldown and high resource cost. Used wisely, they can turn the tide of an otherwise lost wave.
+      </div>
+      <div class="otl-grid">
+        <div class="otl-card" style="--otl-color: rgba(0,229,255,0.3)">
+          <div class="otl-icon">🔵</div>
+          <div class="otl-name" style="color:var(--accent)">ORBITAL LASER</div>
+          <div class="otl-desc">Precision beam from orbit. Sustained burn on a single point. Melts bosses. Short aim window.</div>
+          <div class="card-tags" style="margin-top:10px;justify-content:center"><span class="tag">precision</span><span class="tag">anti-boss</span></div>
+        </div>
+        <div class="otl-card" style="--otl-color: rgba(255,107,0,0.3)">
+          <div class="otl-icon">🚀</div>
+          <div class="otl-name" style="color:var(--accent2)">ORBITAL MISSILE</div>
+          <div class="otl-desc">Guided missile strike. Medium blast radius. Fast deploy. Good all-purpose emergency tool.</div>
+          <div class="card-tags" style="margin-top:10px;justify-content:center"><span class="tag orange">blast</span><span class="tag orange">fast</span></div>
+        </div>
+        <div class="otl-card" style="--otl-color: rgba(255,215,0,0.3)">
+          <div class="otl-icon">☢️</div>
+          <div class="otl-name" style="color:var(--gold)">ORBITAL NUKE</div>
+          <div class="otl-desc">Massive area devastation. Wipes a large zone. Radiation lingers slowing enemies. Slow charge. Friendly fire risk.</div>
+          <div class="card-tags" style="margin-top:10px;justify-content:center"><span class="tag gold">massive AOE</span><span class="tag gold">radiation</span></div>
+        </div>
+        <div class="otl-card" style="--otl-color: rgba(168,85,247,0.3)">
+          <div class="otl-icon">⬛</div>
+          <div class="otl-name" style="color:var(--purple)">METAL BEAM</div>
+          <div class="otl-desc">A tungsten rod dropped from orbit (kinetic impactor). No explosion — pure impact. Crushes heavy armor that resists blasts. Maximum single-hit damage in the game.</div>
+          <div class="card-tags" style="margin-top:10px;justify-content:center"><span class="tag purple">kinetic</span><span class="tag purple">anti-armor</span><span class="tag purple">max DMG</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- AUTOMATION -->
+  <div class="section" id="automation">
+    <div class="section-header">
+      <div class="section-icon">⚙️</div>
+      <div>
+        <div class="section-title">Automation System</div>
+        <div class="section-desc">// FACTORY · CONVEYORS · MACHINES</div>
+      </div>
+    </div>
+
+    <div class="info-box idea">
+      <span class="info-label">// CORE PHILOSOPHY</span>
+      The automation system is what separates IRONFRONT from typical tower defense. Building an efficient factory is as important as tower placement. A good economy lets you spam upgrades; a bad one leaves you defenseless by mid-game.
+    </div>
+
+    <h2>Automation Components</h2>
+    <div class="card-grid">
+      <div class="card" style="--card-accent: var(--accent3)">
+        <div class="card-title">⛏ EXTRACTOR</div>
+        <div class="card-body">Placed on a resource node. Automatically mines ore, wood, crystals, or other materials at a set rate. Upgradeable for speed and yield.</div>
+        <div class="card-tags"><span class="tag green">input</span><span class="tag green">passive</span></div>
+      </div>
+      <div class="card" style="--card-accent: var(--muted)">
+        <div class="card-title">📦 CONVEYOR BELT</div>
+        <div class="card-body">Transports items from one machine to another. Can be split, merged, filtered, and upgraded for speed. The backbone of your factory.</div>
+        <div class="card-tags"><span class="tag">transport</span><span class="tag">filterable</span></div>
+      </div>
+      <div class="card" style="--card-accent: var(--accent)">
+        <div class="card-title">🔧 PROCESSOR / SMELTER</div>
+        <div class="card-body">Converts raw materials into refined goods. Iron Ore → Iron Bars → Steel. Processing chains unlock better tower materials.</div>
+        <div class="card-tags"><span class="tag">refine</span><span class="tag">chain</span></div>
+      </div>
+      <div class="card" style="--card-accent: var(--accent2)">
+        <div class="card-title">🏭 ASSEMBLER</div>
+        <div class="card-body">Combines multiple refined materials into tower components or upgrades. The endpoint of most factory chains. Can be parallelized for throughput.</div>
+        <div class="card-tags"><span class="tag orange">crafting</span><span class="tag orange">endpoint</span></div>
+      </div>
+      <div class="card" style="--card-accent: var(--gold)">
+        <div class="card-title">🔋 POWER GENERATOR</div>
+        <div class="card-body">Machines require power. Generators burn fuel to produce power. Upgrading generators or switching to solar/crystal power unlocks better efficiency.</div>
+        <div class="card-tags"><span class="tag gold">power</span><span class="tag gold">fuel</span></div>
+      </div>
+      <div class="card" style="--card-accent: var(--purple)">
+        <div class="card-title">🗄 STORAGE UNIT</div>
+        <div class="card-body">Buffer storage for materials. Prevents factory backups. Smart storage can auto-route materials based on demand signals from assemblers.</div>
+        <div class="card-tags"><span class="tag purple">buffer</span><span class="tag purple">smart routing</span></div>
+      </div>
+      <div class="card" style="--card-accent: var(--accent3)">
+        <div class="card-title">🔀 SPLITTER / MERGER</div>
+        <div class="card-body">Splits one conveyor lane into two (or more) — or merges multiple belts. Essential for balancing production. Can be set to priority modes.</div>
+        <div class="card-tags"><span class="tag green">belt logic</span></div>
+      </div>
+      <div class="card" style="--card-accent: var(--accent)">
+        <div class="card-title">🤖 DRONE COURIER</div>
+        <div class="card-body">Aerial transport unit that bypasses terrain. More expensive than belts but routes freely over obstacles and defense structures.</div>
+        <div class="card-tags"><span class="tag">aerial</span><span class="tag">late-game</span></div>
+      </div>
+    </div>
+
+    <h2>Example Factory Chain</h2>
+    <div class="flow-diagram" style="flex-direction:column; align-items:flex-start; gap:12px;">
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+        <div class="flow-node resource">Iron Node</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node conveyor">Conveyor</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node machine">Smelter</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node conveyor">Conveyor</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node machine">Assembler</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node output">Tower Parts (Iron)</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+        <div class="flow-node resource">Coal Node</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node conveyor">Conveyor</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node machine">Generator</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node output">⚡ Powers Smelter</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+        <div class="flow-node resource">Crystal Node</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node conveyor">Conveyor</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node machine">Processor</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node output">Energy Cells (for Laser/OTL)</div>
+      </div>
+    </div>
+
+    <h2>Automation Ideas Backlog</h2>
+    <div class="card-grid">
+      <div class="card" style="--card-accent: var(--muted)">
+        <div class="card-title"><span class="status-dot dot-idea"></span>REPAIR DRONES</div>
+        <div class="card-body">Automated drones that patrol and repair towers during/between waves. Requires drone bay building and spare parts from factory.</div>
+      </div>
+      <div class="card" style="--card-accent: var(--muted)">
+        <div class="card-title"><span class="status-dot dot-idea"></span>AUTO-AMMO RESUPPLY</div>
+        <div class="card-body">Some towers (Explosives, Shotgun) run out of ammo. Factory can auto-produce and ship ammo to towers via belts or drones.</div>
+      </div>
+      <div class="card" style="--card-accent: var(--muted)">
+        <div class="card-title"><span class="status-dot dot-idea"></span>RESEARCH LAB</div>
+        <div class="card-body">Consume rare materials to unlock new tower types, conveyor upgrades, or passive bonuses. Acts as a long-term progression sink.</div>
+      </div>
+      <div class="card" style="--card-accent: var(--muted)">
+        <div class="card-title"><span class="status-dot dot-idea"></span>LOGIC GATES / CIRCUITS</div>
+        <div class="card-body">Late-game automation: conditional circuits that redirect resources based on inventory levels. For players who want deep factory optimization.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RESOURCES -->
+  <div class="section" id="resources">
+    <div class="section-header">
+      <div class="section-icon">💎</div>
+      <div>
+        <div class="section-title">Resource System</div>
+        <div class="section-desc">// MATERIALS · RARITY · PROCESSING CHAINS</div>
+      </div>
+    </div>
+
+    <table class="resource-table">
+      <thead>
+        <tr>
+          <th>Resource</th>
+          <th>Rarity</th>
+          <th>Source</th>
+          <th>Used For</th>
+          <th>Refined Into</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>🪨 Stone</td>
+          <td class="rarity-common">Common</td>
+          <td>Surface nodes</td>
+          <td>Basic walls, foundations</td>
+          <td>Concrete Blocks</td>
+        </tr>
+        <tr>
+          <td>⛏ Iron Ore</td>
+          <td class="rarity-common">Common</td>
+          <td>Mine shafts</td>
+          <td>Basic tower parts</td>
+          <td>Iron Bar → Steel</td>
+        </tr>
+        <tr>
+          <td>🌲 Wood</td>
+          <td class="rarity-common">Common</td>
+          <td>Forest nodes</td>
+          <td>Conveyor frames, bows</td>
+          <td>Plank → Composite</td>
+        </tr>
+        <tr>
+          <td>🔥 Coal</td>
+          <td class="rarity-common">Common</td>
+          <td>Coal deposits</td>
+          <td>Generator fuel</td>
+          <td>Coke (smelting agent)</td>
+        </tr>
+        <tr>
+          <td>🔵 Crystal</td>
+          <td class="rarity-uncommon">Uncommon</td>
+          <td>Crystal caves</td>
+          <td>Energy towers, lasers</td>
+          <td>Energy Cells</td>
+        </tr>
+        <tr>
+          <td>⚙ Gear Metal</td>
+          <td class="rarity-uncommon">Uncommon</td>
+          <td>Deep mines</td>
+          <td>Conveyor upgrades, LMG</td>
+          <td>Alloy Parts</td>
+        </tr>
+        <tr>
+          <td>⚡ Electrite</td>
+          <td class="rarity-rare">Rare</td>
+          <td>Storm zones</td>
+          <td>Advanced towers, power</td>
+          <td>Conductors</td>
+        </tr>
+        <tr>
+          <td>🧪 Bio-Extract</td>
+          <td class="rarity-rare">Rare</td>
+          <td>Enemy drops</td>
+          <td>Poison arrows, acid</td>
+          <td>Toxin Vials</td>
+        </tr>
+        <tr>
+          <td>🌌 Void Shard</td>
+          <td class="rarity-epic">Epic</td>
+          <td>Boss drops</td>
+          <td>OTL weapons, top-tier upgrades</td>
+          <td>Void Core</td>
+        </tr>
+        <tr>
+          <td>☀ Solar Glass</td>
+          <td class="rarity-epic">Epic</td>
+          <td>Desert biome</td>
+          <td>Solar generators, OTL Laser</td>
+          <td>Photon Lens</td>
+        </tr>
+        <tr>
+          <td>🏆 Star Metal</td>
+          <td class="rarity-legendary">Legendary</td>
+          <td>Meteor events / final boss</td>
+          <td>Metal Beam (OTL), endgame towers</td>
+          <td>Tungsten Rod</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="info-box warning">
+      <span class="info-label">// DESIGN CONSIDERATION</span>
+      Resource scarcity should create meaningful trade-offs. Limited Void Shards mean choosing between OTL weapons or top-tier tower upgrades — never both. This decision should feel weighty.
+    </div>
+  </div>
+
+  <!-- ENEMIES -->
+  <div class="section" id="enemies">
+    <div class="section-header">
+      <div class="section-icon">👾</div>
+      <div>
+        <div class="section-title">Enemy Types</div>
+        <div class="section-desc">// GROUND · AERIAL · BOSS</div>
+      </div>
+    </div>
+
+    <h2>Ground Units</h2>
+    <div class="enemy-grid">
+      <div class="enemy-card">
+        <div class="enemy-name">GRUNT</div>
+        <div class="enemy-type">Basic infantry</div>
+        <div style="font-size:12px;color:var(--text)">Low HP, no special traits. Swarms early waves. Cannon fodder.</div>
+        <div class="card-tags" style="margin-top:8px"><span class="tag red">common</span></div>
+      </div>
+      <div class="enemy-card">
+        <div class="enemy-name">ARMORED BRUTE</div>
+        <div class="enemy-type">Heavy infantry</div>
+        <div style="font-size:12px;color:var(--text)">High HP, armor plating. Resistant to bullets. Weak to laser / metal beam.</div>
+        <div class="card-tags" style="margin-top:8px"><span class="tag red">armored</span></div>
+      </div>
+      <div class="enemy-card">
+        <div class="enemy-name">RUSHER</div>
+        <div class="enemy-type">Speed unit</div>
+        <div style="font-size:12px;color:var(--text)">Very fast, low HP. Tries to reach the core before towers can react.</div>
+        <div class="card-tags" style="margin-top:8px"><span class="tag red">fast</span></div>
+      </div>
+      <div class="enemy-card">
+        <div class="enemy-name">SHIELDER</div>
+        <div class="enemy-type">Support</div>
+        <div style="font-size:12px;color:var(--text)">Projects a shield that blocks projectiles. Must be flanked or hit with AOE.</div>
+        <div class="card-tags" style="margin-top:8px"><span class="tag red">shield</span></div>
+      </div>
+      <div class="enemy-card">
+        <div class="enemy-name">SAPPER</div>
+        <div class="enemy-type">Saboteur</div>
+        <div style="font-size:12px;color:var(--text)">Targets your factory buildings instead of the core. Destroys conveyors and machines.</div>
+        <div class="card-tags" style="margin-top:8px"><span class="tag red">anti-factory</span></div>
+      </div>
+      <div class="enemy-card">
+        <div class="enemy-name">TANK</div>
+        <div class="enemy-type">Siege unit</div>
+        <div style="font-size:12px;color:var(--text)">Massive HP, slow movement. Fires at towers when in range. Priority target.</div>
+        <div class="card-tags" style="margin-top:8px"><span class="tag red">siege</span></div>
+      </div>
+    </div>
+
+    <h2>Aerial Units</h2>
+    <div class="enemy-grid">
+      <div class="enemy-card" style="border-color:rgba(0,229,255,0.2)">
+        <div class="enemy-name" style="color:var(--accent)">FLYER SCOUT</div>
+        <div class="enemy-type">Aerial recon</div>
+        <div style="font-size:12px;color:var(--text)">Reveals tower positions. Ignored by melee towers. Only ranged/laser can hit.</div>
+        <div class="card-tags" style="margin-top:8px"><span class="tag">aerial</span></div>
+      </div>
+      <div class="enemy-card" style="border-color:rgba(0,229,255,0.2)">
+        <div class="enemy-name" style="color:var(--accent)">BOMBER</div>
+        <div class="enemy-type">Aerial assault</div>
+        <div style="font-size:12px;color:var(--text)">Drops payloads on factory buildings. Must be intercepted mid-flight.</div>
+        <div class="card-tags" style="margin-top:8px"><span class="tag">aerial</span><span class="tag">anti-factory</span></div>
+      </div>
+      <div class="enemy-card" style="border-color:rgba(0,229,255,0.2)">
+        <div class="enemy-name" style="color:var(--accent)">JAMMER DRONE</div>
+        <div class="enemy-type">EW unit</div>
+        <div style="font-size:12px;color:var(--text)">Disables towers in an area temporarily. Hard counter to laser towers.</div>
+        <div class="card-tags" style="margin-top:8px"><span class="tag">jam</span><span class="tag">aerial</span></div>
+      </div>
+    </div>
+
+    <h2>Boss Enemies</h2>
+    <div class="card-grid">
+      <div class="card" style="--card-accent: var(--gold)">
+        <div class="card-title">👑 COLOSSUS</div>
+        <div class="card-body">Wave 5, 10, 15 boss. Massive melee unit. Charges through tower lines. Drops Void Shards. Weak to OTL Laser.</div>
+        <div class="card-tags"><span class="tag gold">boss</span><span class="tag gold">melee</span></div>
+      </div>
+      <div class="card" style="--card-accent: var(--gold)">
+        <div class="card-title">✈ CARRIER SHIP</div>
+        <div class="card-body">Aerial carrier that continuously spawns smaller units. Defeat the carrier to stop the spawn loop. Very high HP. Requires anti-air focus.</div>
+        <div class="card-tags"><span class="tag gold">boss</span><span class="tag gold">spawner</span><span class="tag gold">aerial</span></div>
+      </div>
+      <div class="card" style="--card-accent: var(--gold)">
+        <div class="card-title">🕳 VOID WALKER</div>
+        <div class="card-body">Final boss. Teleports through the map, ignoring all path restrictions. Requires coordinated defense and OTL use. Drops Star Metal on death.</div>
+        <div class="card-tags"><span class="tag gold">final boss</span><span class="tag gold">teleport</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- WAVES -->
+  <div class="section" id="waves">
+    <div class="section-header">
+      <div class="section-icon">🌊</div>
+      <div>
+        <div class="section-title">Wave System</div>
+        <div class="section-desc">// TIMING · PHASES · ESCALATION</div>
+      </div>
+    </div>
+
+    <h2>Wave Phase Structure</h2>
+    <p>Each wave cycle follows this pattern:</p>
+    <div class="wave-bar">
+      <div class="wave-segment ws-prep" style="--w:2">PREP 60s</div>
+      <div class="wave-segment ws-wave" style="--w:4">WAVE ACTIVE</div>
+      <div class="wave-segment ws-bonus" style="--w:1">LOOT DROP</div>
+    </div>
+    <div class="wave-bar">
+      <div class="wave-segment ws-prep" style="--w:1">PREP 30s</div>
+      <div class="wave-segment ws-wave" style="--w:5">WAVE ACTIVE (harder)</div>
+      <div class="wave-segment ws-bonus" style="--w:1">LOOT DROP</div>
+    </div>
+    <div class="wave-bar">
+      <div class="wave-segment ws-prep" style="--w:1">PREP</div>
+      <div class="wave-segment ws-boss" style="--w:6">BOSS WAVE</div>
+      <div class="wave-segment ws-bonus" style="--w:2">MAJOR LOOT</div>
+    </div>
+
+    <h2>Escalation System</h2>
+    <div class="card-grid">
+      <div class="card" style="--card-accent: var(--accent3)">
+        <div class="card-title">EARLY WAVES (1–5)</div>
+        <div class="card-body">Grunts and Rushers only. Prep time is generous. Focus on getting your first factory chain running.</div>
+        <div style="margin-top:12px">
+          <div style="font-size:11px;color:var(--muted);font-family:'Share Tech Mono',monospace;margin-bottom:4px">DIFFICULTY</div>
+          <div class="prog-bar-container"><div class="prog-bar" style="width:20%;--bar-color:var(--accent3)"></div></div>
+        </div>
+      </div>
+      <div class="card" style="--card-accent: var(--accent)">
+        <div class="card-title">MID WAVES (6–12)</div>
+        <div class="card-body">Armored units, flyers, and first Sappers appear. Factory defense becomes important. Prep time shortens.</div>
+        <div style="margin-top:12px">
+          <div style="font-size:11px;color:var(--muted);font-family:'Share Tech Mono',monospace;margin-bottom:4px">DIFFICULTY</div>
+          <div class="prog-bar-container"><div class="prog-bar" style="width:55%;--bar-color:var(--accent)"></div></div>
+        </div>
+      </div>
+      <div class="card" style="--card-accent: var(--accent2)">
+        <div class="card-title">LATE WAVES (13–18)</div>
+        <div class="card-body">Tanks, Jammer Drones, Carriers. Multi-lane assaults. Economy pressure is intense. OTL weapons become necessary.</div>
+        <div style="margin-top:12px">
+          <div style="font-size:11px;color:var(--muted);font-family:'Share Tech Mono',monospace;margin-bottom:4px">DIFFICULTY</div>
+          <div class="prog-bar-container"><div class="prog-bar" style="width:80%;--bar-color:var(--accent2)"></div></div>
+        </div>
+      </div>
+      <div class="card" style="--card-accent: var(--gold)">
+        <div class="card-title">ENDGAME (19–20)</div>
+        <div class="card-body">Void Walker + max-tier enemies. All enemy types simultaneously. Factory likely under constant attack. This is the final test.</div>
+        <div style="margin-top:12px">
+          <div style="font-size:11px;color:var(--muted);font-family:'Share Tech Mono',monospace;margin-bottom:4px">DIFFICULTY</div>
+          <div class="prog-bar-container"><div class="prog-bar" style="width:100%;--bar-color:var(--gold)"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="info-box idea">
+      <span class="info-label">// IDEA: DYNAMIC WAVES</span>
+      Instead of purely scripted waves, consider a <strong style="color:var(--accent3)">budget system</strong> — each wave gets an enemy-budget that the game fills with a mix of units based on the player's current tower composition. Weak to aerial? More flyers spawn. Heavy defense? More Sappers. Creates adaptive difficulty.
+    </div>
+  </div>
+
+  <!-- UPGRADES -->
+  <div class="section" id="upgrades">
+    <div class="section-header">
+      <div class="section-icon">📈</div>
+      <div>
+        <div class="section-title">Upgrade System</div>
+        <div class="section-desc">// TOWER TREES · GLOBAL · FACTORY</div>
+      </div>
+    </div>
+
+    <h2>Tower Upgrade Tree — Example: Sniper</h2>
+    <div class="upgrade-tree">
+      <div class="upgrade-tier">
+        <div class="upgrade-tier-label">// BASE</div>
+        <div class="upgrade-node tier1">
+          Sniper Mk I
+          <div class="upgrade-cost">FREE</div>
+        </div>
+      </div>
+      <div class="upgrade-tier">
+        <div class="upgrade-tier-label">// TIER 1</div>
+        <div class="upgrade-node tier1">
+          Extended Barrel (+Range)
+          <div class="upgrade-cost">50 Iron</div>
+        </div>
+        <div class="upgrade-node tier1">
+          High-Velocity Rounds (+DMG)
+          <div class="upgrade-cost">40 Iron</div>
+        </div>
+      </div>
+      <div class="upgrade-tier">
+        <div class="upgrade-tier-label">// TIER 2</div>
+        <div class="upgrade-node tier2">
+          Railgun Core (pierces all)
+          <div class="upgrade-cost">120 Steel + Crystal</div>
+        </div>
+        <div class="upgrade-node tier2">
+          EMP Round (stun on hit)
+          <div class="upgrade-cost">80 Electrite</div>
+        </div>
+      </div>
+      <div class="upgrade-tier">
+        <div class="upgrade-tier-label">// TIER 3</div>
+        <div class="upgrade-node tier3">
+          Singularity Shot (pull enemies)
+          <div class="upgrade-cost">1 Void Shard + 200 Steel</div>
+        </div>
+        <div class="upgrade-node tier3">
+          Auto-Tracking AI (+200% accuracy)
+          <div class="upgrade-cost">150 Electrite</div>
+        </div>
+      </div>
+      <div class="upgrade-tier">
+        <div class="upgrade-tier-label">// TIER 4</div>
+        <div class="upgrade-node tier4">
+          GODSHOT — One-shots any non-boss
+          <div class="upgrade-cost">2 Void Shard + Star Metal</div>
+        </div>
+      </div>
+    </div>
+
+    <h2>Global Upgrades (Research Lab)</h2>
+    <div class="card-grid">
+      <div class="card" style="--card-accent: var(--accent3)">
+        <div class="card-title">BELT VELOCITY I / II / III</div>
+        <div class="card-body">Increases conveyor belt speed by 25% / 50% / 100%. Dramatically improves factory throughput.</div>
+        <div class="card-tags"><span class="tag green">factory</span></div>
+      </div>
+      <div class="card" style="--card-accent: var(--accent)">
+        <div class="card-title">TOWER GRID DENSITY</div>
+        <div class="card-body">Allows one extra tower per map zone. Unlocks tighter placement to create overlapping fire zones.</div>
+        <div class="card-tags"><span class="tag">defense</span></div>
+      </div>
+      <div class="card" style="--card-accent: var(--gold)">
+        <div class="card-title">ORBITAL RECHARGE</div>
+        <div class="card-body">Reduces OTL weapon cooldowns by 20%. Essential for heavy endgame reliance on superweapons.</div>
+        <div class="card-tags"><span class="tag gold">OTL</span></div>
+      </div>
+      <div class="card" style="--card-accent: var(--danger)">
+        <div class="card-title">ANTI-AIR DOCTRINE</div>
+        <div class="card-body">All towers gain +15% damage vs aerial targets. Unlocks the Anti-Air Missile Battery tower.</div>
+        <div class="card-tags"><span class="tag red">anti-air</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- IDEAS BACKLOG -->
+  <div class="section" id="ideas">
+    <div class="section-header">
+      <div class="section-icon">💡</div>
+      <div>
+        <div class="section-title">Ideas Backlog</div>
+        <div class="section-desc">// CONCEPTS TO EXPLORE · UNFINISHED THOUGHTS</div>
+      </div>
+    </div>
+
+    <div class="info-box">
+      <span class="info-label">// LEGEND</span>
+      <span class="status-dot dot-done"></span> Fleshed out enough to design &nbsp;&nbsp;
+      <span class="status-dot dot-wip"></span> Needs more thinking &nbsp;&nbsp;
+      <span class="status-dot dot-idea"></span> Just an idea seed
+    </div>
+
+    <h2>Towers & Combat</h2>
+    <div class="card-grid">
+      <div class="card" style="--card-accent: var(--muted)">
+        <div class="card-title"><span class="status-dot dot-idea"></span>TOWER SYNERGIES</div>
+        <div class="card-body">Certain towers placed adjacent buff each other — Bola + Shotgun = devastating slowed spread. Creates placement puzzles.</div>
+      </div>
+      <div class="card" style="--card-accent: var(--muted)">
+        <div class="card-title"><span class="status-dot dot-idea"></span>TOWER DECAY</div>
+        <div class="card-body">Towers degrade over time and need maintenance from the factory. Adds urgency to the automation loop.</div>
+      </div>
+      <div class="card" style="--card-accent: var(--muted)">
+        <div class="card-title"><span class="status-dot dot-idea"></span>HERO UNIT</div>
+        <div class="card-body">A controllable hero character who can manually fight, repair machines, or place towers. Adds an action layer on top of strategy.</div>
+      </div>
+      <div class="card" style="--card-accent: var(--muted)">
+        <div class="card-title"><span class="status-dot dot-wip"></span>WALL SYSTEM</div>
+        <div class="card-body">Buildable walls that redirect enemy paths through your kill zones. Can be upgraded to electric walls or spike walls.</div>
+      </div>
+    </div>
+
+    <h2>Automation & Factory</h2>
+    <div class="card-grid">
+      <div class="card" style="--card-accent: var(--muted)">
+        <div class="card-title"><span class="status-dot dot-idea"></span>UNDERGROUND BELTS</div>
+        <div class="card-body">Tunnel belts that go under paths, allowing factory routing under enemy lanes without conflict.</div>
+      </div>
+      <div class="card" style="--card-accent: var(--muted)">
+        <div class="card-title"><span class="status-dot dot-idea"></span>OVERFLOW MARKETS</div>
+        <div class="card-body">Excess factory output can be sold for gold, which can buy rare resources you can't mine. Trade economy as a late-game money tap.</div>
+      </div>
+      <div class="card" style="--card-accent: var(--muted)">
+        <div class="card-title"><span class="status-dot dot-wip"></span>MACHINE TIERS</div>
+        <div class="card-body">Mk1 → Mk2 → Mk3 machines. Higher tiers process faster and can handle more complex recipes. Require more power.</div>
+      </div>
+    </div>
+
+    <h2>Game Modes</h2>
+    <div class="card-grid">
+      <div class="card" style="--card-accent: var(--muted)">
+        <div class="card-title"><span class="status-dot dot-idea"></span>ENDLESS MODE</div>
+        <div class="card-body">No final boss — waves keep coming with increasing difficulty. Score tracked. Leaderboards.</div>
+      </div>
+      <div class="card" style="--card-accent: var(--muted)">
+        <div class="card-title"><span class="status-dot dot-idea"></span>PUZZLE MODE</div>
+        <div class="card-body">Fixed resource budget, pre-set enemy waves. Solve the optimal factory + tower layout. Like a puzzle game skin over the core systems.</div>
+      </div>
+      <div class="card" style="--card-accent: var(--muted)">
+        <div class="card-title"><span class="status-dot dot-idea"></span>CO-OP</div>
+        <div class="card-body">2-player: one player manages towers, other manages the factory. Forces communication and coordination. Very high tension.</div>
+      </div>
+    </div>
+
+    <h2>More Tower Ideas</h2>
+    <div class="card-grid">
+      <div class="card" style="--card-accent: var(--muted)">
+        <div class="card-title"><span class="status-dot dot-idea"></span>FLAMETHROWER</div>
+        <div class="card-body">Short range, continuous fire cone. Burns ground for lingering area damage. Strong vs swarm, weak vs armored.</div>
+      </div>
+      <div class="card" style="--card-accent: var(--muted)">
+        <div class="card-title"><span class="status-dot dot-idea"></span>TESLA COIL</div>
+        <div class="card-body">Chains lightning between nearby enemies. Better the more clustered the group. Synergy with Net/Bola.</div>
+      </div>
+      <div class="card" style="--card-accent: var(--muted)">
+        <div class="card-title"><span class="status-dot dot-idea"></span>POISON GAS MORTAR</div>
+        <div class="card-body">Fires canisters that create lingering gas clouds. Doesn't kill fast but denies areas. Utility tower.</div>
+      </div>
+      <div class="card" style="--card-accent: var(--muted)">
+        <div class="card-title"><span class="status-dot dot-idea"></span>MAGNET TOWER</div>
+        <div class="card-body">Pulls metallic enemies toward it, clustering them. Works as a bait + area damage combo with nearby explosive towers.</div>
+      </div>
+      <div class="card" style="--card-accent: var(--muted)">
+        <div class="card-title"><span class="status-dot dot-idea"></span>SPEAR LAUNCHER</div>
+        <div class="card-body">Fires large spears that pin enemies to the ground, immobilizing them for a duration. High single-target CC.</div>
+      </div>
+      <div class="card" style="--card-accent: var(--muted)">
+        <div class="card-title"><span class="status-dot dot-idea"></span>ANTI-AIR MISSILE BAT</div>
+        <div class="card-body">Dedicated anti-air tower. Fires tracking missiles at aerial units. Useless vs ground. Placement trade-off.</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  IRONFRONT GDD v0.1 — CONCEPT DRAFT — UNFINISHED &amp; EVOLVING
+</footer>
+
+<script>
+  function showSection(id) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    event.target.classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+</script>
+</body>
+</html>
