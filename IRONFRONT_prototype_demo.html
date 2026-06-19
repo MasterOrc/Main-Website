@@ -1,0 +1,80 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>IRONFRONT Prototype Demo</title>
+<style>
+body{margin:0;background:#081018;color:#d7f7ff;font-family:Arial}
+#top{padding:10px;background:#0f1f2a;display:flex;gap:20px}
+#game{display:block;margin:0 auto;border:1px solid #00d9ff;background:#12202c}
+button{padding:6px 10px}
+</style>
+</head>
+<body>
+<div id="top">
+  <div>IRONFRONT Prototype Demo</div>
+  <div>Resources: <span id="res">0</span></div>
+  <div>Base HP: <span id="hp">100</span></div>
+  <button onclick="buildTower()">Build Tower (25)</button>
+</div>
+<canvas id="game" width="900" height="500"></canvas>
+<script>
+const c=document.getElementById('game'),x=c.getContext('2d');
+let res=50,hp=100;
+const path=[{x:0,y:250},{x:250,y:250},{x:250,y:100},{x:600,y:100},{x:600,y:400},{x:900,y:400}];
+let enemies=[],towers=[];
+setInterval(()=>res++,1000);
+setInterval(()=>enemies.push({seg:0,t:0,h:30}),1800);
+
+function buildTower(){
+ if(res<25) return;
+ res-=25;
+ towers.push({x:320+Math.random()*220,y:180+Math.random()*180,cool:0});
+}
+function pos(e){
+ let a=path[e.seg],b=path[e.seg+1];
+ return {x:a.x+(b.x-a.x)*e.t,y:a.y+(b.y-a.y)*e.t};
+}
+function upd(){
+ enemies.forEach(e=>{
+   e.t+=0.005;
+   if(e.t>=1){e.seg++;e.t=0;}
+ });
+ enemies=enemies.filter(e=>{
+   if(e.seg>=path.length-1){hp-=10;return false;}
+   return e.h>0;
+ });
+ towers.forEach(t=>{
+   t.cool--;
+   if(t.cool<=0){
+      let target=enemies[0];
+      if(target){target.h-=10;t.cool=25;}
+   }
+ });
+ document.getElementById('res').textContent=res;
+ document.getElementById('hp').textContent=hp;
+}
+function draw(){
+ x.clearRect(0,0,c.width,c.height);
+ x.strokeStyle="#00d9ff";x.lineWidth=20;
+ x.beginPath(); x.moveTo(path[0].x,path[0].y);
+ path.slice(1).forEach(p=>x.lineTo(p.x,p.y)); x.stroke();
+
+ towers.forEach(t=>{
+   x.fillStyle="#39ff14";
+   x.fillRect(t.x-10,t.y-10,20,20);
+ });
+
+ enemies.forEach(e=>{
+   let p=pos(e);
+   x.fillStyle="red";
+   x.beginPath();x.arc(p.x,p.y,10,0,7);x.fill();
+ });
+ requestAnimationFrame(draw);
+}
+setInterval(upd,30);
+draw();
+</script>
+</body>
+</html>
